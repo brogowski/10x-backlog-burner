@@ -261,6 +261,7 @@ select public.ensure_policy(
         create policy user_games_update_authenticated on public.user_games
             for update
             to authenticated
+            using (auth.uid() = user_id)
             with check (auth.uid() = user_id);
     $policy$
 );

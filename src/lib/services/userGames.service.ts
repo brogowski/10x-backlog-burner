@@ -174,6 +174,28 @@ export const reorderInProgress = async (
   for (const item of items) {
     const { error } = await supabase
       .from("user_games")
+      .update({ in_progress_position: -item.position })
+      .eq("user_id", userId)
+      .eq("game_id", item.steamAppId)
+      .eq("status", "in_progress")
+
+    if (error) {
+      if (isUniqueViolation(error)) {
+        throw new UserGamesServiceError(
+          "DuplicatePositions",
+          "Conflicting in-progress positions.",
+          { details: error },
+        )
+      }
+
+      throw createUserGamesServiceError(error, "BacklogReorderFailed")
+    }
+    updated += 1
+  }
+  
+  for (const item of items) {
+    const { error } = await supabase
+      .from("user_games")
       .update({ in_progress_position: item.position })
       .eq("user_id", userId)
       .eq("game_id", item.steamAppId)
@@ -190,8 +212,6 @@ export const reorderInProgress = async (
 
       throw createUserGamesServiceError(error, "BacklogReorderFailed")
     }
-
-    updated += 1
   }
 
   return { updated }
