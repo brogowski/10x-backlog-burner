@@ -97,7 +97,7 @@ const InProgressList = ({
               key={item.steamAppId}
               item={item}
               index={index}
-              isMutating={activeItemMutations[item.steamAppId] !== "idle"}
+            isMutating={(activeItemMutations[item.steamAppId] ?? "idle") !== "idle"}
               isReordering={isReordering}
               onMoveUp={() => moveItem(index, -1)}
               onMoveDown={() => moveItem(index, 1)}

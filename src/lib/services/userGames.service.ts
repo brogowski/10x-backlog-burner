@@ -229,6 +229,7 @@ export const updateUserGame = async (
 ): Promise<UserGameDTO> => {
   const existing = await fetchUserGame(userId, steamAppId, supabase)
   const targetStatus = command.status ?? existing.status
+  const leavingInProgress = existing.status === "in_progress" && targetStatus !== "in_progress"
 
   if (!isValidTransition(existing.status, targetStatus)) {
     throw new UserGamesServiceError(
@@ -276,6 +277,10 @@ export const updateUserGame = async (
 
   if (!data) {
     throw new UserGamesServiceError("EntryNotFound", "User game not found.")
+  }
+
+  if (leavingInProgress) {
+    await compactInProgressPositions(userId, existing.in_progress_position, supabase)
   }
 
   return mapRowToDto(assertSelection(data))
@@ -485,6 +490,51 @@ const ensureInProgressCapacity = async (
       "In-progress queue is full.",
       { details: { cap: IN_PROGRESS_CAP } },
     )
+  }
+}
+
+const compactInProgressPositions = async (
+  userId: string,
+  vacatedPosition: number | null,
+  supabase: SupabaseClient,
+): Promise<void> => {
+  if (vacatedPosition === null || vacatedPosition === undefined) return
+
+  const { data, error } = await supabase
+    .from("user_games")
+    .select("game_id, in_progress_position")
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+    .gt("in_progress_position", vacatedPosition)
+    .order("in_progress_position", { ascending: true })
+
+  if (error) {
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+  }
+
+  for (const row of data ?? []) {
+    if (typeof row.in_progress_position !== "number") {
+      continue
+    }
+
+    const { error: updateError } = await supabase
+      .from("user_games")
+      .update({ in_progress_position: row.in_progress_position - 1 })
+      .eq("user_id", userId)
+      .eq("game_id", row.game_id)
+      .eq("status", "in_progress")
+
+    if (updateError) {
+      if (isUniqueViolation(updateError)) {
+        throw new UserGamesServiceError(
+          "DuplicatePositions",
+          "Conflicting in-progress positions.",
+          { details: updateError },
+        )
+      }
+
+      throw createUserGamesServiceError(updateError, "BacklogUpdateFailed")
+    }
   }
 }
 
