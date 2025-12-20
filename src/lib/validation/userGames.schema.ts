@@ -8,6 +8,7 @@ const ORDERABLE_FIELDS = [
   "updated_at",
   "popularity_score",
 ] as const
+const steamAppIdParamSchema = z.coerce.number().int().positive()
 
 const paginationFields = {
   page: z.coerce.number().int().min(1).default(1),
@@ -96,9 +97,59 @@ const reorderSchema = z
     }
   })
 
+const updateUserGameSchema = z
+  .object({
+    status: z.enum(["backlog", "in_progress" ]).optional(),
+    inProgressPosition: z
+      .union([z.null(), z.coerce.number().int().min(1)])
+      .optional(),
+    achievementsUnlocked: z.coerce.number().int().min(0).optional(),
+  })
+  .superRefine((value, ctx) => {
+    const hasAnyField =
+      value.status !== undefined ||
+      value.inProgressPosition !== undefined ||
+      value.achievementsUnlocked !== undefined
+
+    if (!hasAnyField) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one field must be provided",
+      })
+      return
+    }
+
+    if (value.status === "in_progress" && value.inProgressPosition === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["inProgressPosition"],
+        message: "inProgressPosition is required when status is in_progress",
+      })
+    }
+
+    if (
+      value.status &&
+      value.status !== "in_progress" &&
+      value.inProgressPosition !== undefined &&
+      value.inProgressPosition !== null
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["inProgressPosition"],
+        message: "inProgressPosition must be null unless status is in_progress",
+      })
+    }
+  })
+
+const completeUserGameSchema = z.object({
+  achievementsUnlocked: z.coerce.number().int().min(0).optional(),
+})
+
 export type UserGamesQuery = z.infer<typeof querySchema>
 export type CreateUserGamePayload = z.infer<typeof createUserGameSchema>
 export type ReorderInProgressPayload = z.infer<typeof reorderSchema>
+export type UpdateUserGamePayload = z.infer<typeof updateUserGameSchema>
+export type CompleteUserGamePayload = z.infer<typeof completeUserGameSchema>
 
 export const parseUserGamesQuery = (params: URLSearchParams): UserGamesQuery => {
   const rawStatuses = collectStatuses(params)
@@ -145,6 +196,17 @@ export const parseCreateUserGame = (payload: unknown): CreateUserGamePayload =>
 export const parseReorderInProgress = (
   payload: unknown,
 ): ReorderInProgressPayload => reorderSchema.parse(payload)
+
+export const parseUpdateUserGame = (
+  payload: unknown,
+): UpdateUserGamePayload => updateUserGameSchema.parse(payload)
+
+export const parseCompleteUserGame = (
+  payload: unknown,
+): CompleteUserGamePayload => completeUserGameSchema.parse(payload ?? {})
+
+export const parseSteamAppIdParam = (value: unknown): number =>
+  steamAppIdParamSchema.parse(value)
 
 const collectStatuses = (params: URLSearchParams): GamePlayStatus[] => {
   const values = [

@@ -10,7 +10,7 @@ type GameRow = Tables<"games">
 type UserGameRow = Tables<"user_games">
 type UserGameInsert = TablesInsert<"user_games">
 type UserGameUpdate = TablesUpdate<"user_games">
-type GamePlayStatus = Enums<"game_play_status">
+export type GamePlayStatus = Enums<"game_play_status">
 
 type SuggestionWeightsBase = Extract<
   ProfileRow["suggestion_weights"],
@@ -107,11 +107,14 @@ export type CreateUserGameCommand = {
   inProgressPosition: UserGameInsert["in_progress_position"]
 }
 
+/**
+ * Partial update payload for a single user game.
+ * At least one field must be provided at runtime by the validator.
+ */
 export type UpdateUserGameCommand = Partial<{
   status: UserGameUpdate["status"]
   inProgressPosition: UserGameUpdate["in_progress_position"]
   achievementsUnlocked: UserGameUpdate["achievements_unlocked"]
-  completedAt: UserGameUpdate["completed_at"]
 }>
 
 export type ReorderInProgressCommand = {
