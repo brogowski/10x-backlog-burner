@@ -148,13 +148,6 @@ Out of scope for MVP:
     2. No external links required.
 
 - ID: US-014
-  Title: Artwork caching
-  Description: As a user, I want artwork to load quickly on revisits.
-  Acceptance Criteria:
-    1. Artwork is cached client-side.
-    2. Cached images display without new network requests.
-
-- ID: US-015
   Title: Enforce in-progress cap
   Description: As a user, I want the system to enforce a maximum number of in-progress games.
   Acceptance Criteria:
