@@ -1,0 +1,11 @@
+---
+import InProgressPageView from "../components/in-progress/InProgressPageView"
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="In Progress">
+  <main>
+    <InProgressPageView client:only="react" />
+  </main>
+</Layout>
+
