@@ -1,0 +1,11 @@
+---
+import BacklogPageView from "../components/backlog/BacklogPageView"
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="Backlog">
+  <main>
+    <BacklogPageView client:only="react" />
+  </main>
+</Layout>
+

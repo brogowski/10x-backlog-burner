@@ -33,14 +33,14 @@ export class ApiError extends Error {
 const SUPABASE_AUTH_TOKEN =
   "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU0MzIxL2F1dGgvdjEiLCJzdWIiOiJkODcxMTFmOC0yNDc4LTQyOGYtYjYxOC1lOWVjODRiNTJmNjEiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzY2MjM4MzkzLCJpYXQiOjE3NjYyMzQ3OTMsImVtYWlsIjoiYmFydGxvbWllai5yb2dvd3NraUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc2NjIzNDc5M31dLCJzZXNzaW9uX2lkIjoiNGVhZDI3MjgtOTkzNy00ZjBiLTk1Y2EtZjFkNjk3YTY0ZDBlIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.GmDfNKEbQJXBh3LmhUk64DRIQ_1ZJ8vVSsosPoIBcpo"
 
-const defaultJsonHeaders = { "content-type": "application/json" }
+export const defaultJsonHeaders = { "content-type": "application/json" }
 
-const buildAuthHeaders = (extra?: HeadersInit) => ({
+export const buildAuthHeaders = (extra?: HeadersInit) => ({
   ...extra,
   "sb-auth-token": SUPABASE_AUTH_TOKEN,
 })
 
-const parseRateLimitHeaders = (response: Response): RateLimitMetadata => {
+export const parseRateLimitHeaders = (response: Response): RateLimitMetadata => {
   const limit = response.headers.get("x-ratelimit-limit")
   const remaining = response.headers.get("x-ratelimit-remaining")
   const reset = response.headers.get("x-ratelimit-reset")
@@ -62,7 +62,9 @@ const parseJsonBody = async <T>(response: Response): Promise<T | undefined> => {
   }
 }
 
-const handleResponse = async <T>(response: Response): Promise<{ data: T; rateLimit: RateLimitMetadata }> => {
+export const handleResponse = async <T>(
+  response: Response,
+): Promise<{ data: T; rateLimit: RateLimitMetadata }> => {
   const rateLimit = parseRateLimitHeaders(response)
 
   if (response.ok) {
