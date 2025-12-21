@@ -9,6 +9,10 @@ declare global {
       supabase: SupabaseClient
       requestId: string
       rateLimit?: RateLimitContext
+      user?: {
+        id: string
+        email: string | null
+      }
     }
   }
 }

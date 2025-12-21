@@ -91,3 +91,27 @@ export const clearSessionCookies = (headers: Headers) => {
     expires: expired,
   })
 }
+
+const getCookieValue = (cookieHeader: string | null | undefined, name: string): string | undefined => {
+  if (!cookieHeader) return undefined
+
+  const cookies = cookieHeader.split(";")
+  for (const cookie of cookies) {
+    const trimmed = cookie.trim()
+    if (!trimmed.startsWith(`${name}=`)) continue
+
+    const [, value] = trimmed.split("=")
+    if (value === undefined) continue
+
+    return decodeURIComponent(value)
+  }
+
+  return undefined
+}
+
+export const readSessionCookies = (cookieHeader: string | null | undefined) => {
+  const accessToken = getCookieValue(cookieHeader, ACCESS_TOKEN_COOKIE)
+  const refreshToken = getCookieValue(cookieHeader, REFRESH_TOKEN_COOKIE)
+
+  return { accessToken, refreshToken }
+}
