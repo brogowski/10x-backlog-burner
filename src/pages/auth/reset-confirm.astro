@@ -1,0 +1,38 @@
+---
+import PasswordResetView from "../../components/auth/PasswordResetView"
+import AuthLayout from "../../layouts/AuthLayout.astro"
+
+export const prerender = false
+
+const DISALLOWED_REDIRECTS = ["/auth", "/auth/", "/auth/reset-confirm", "/reset-password"]
+
+const sanitizeRedirect = (value: string | null): string | null => {
+  if (!value) return null
+  try {
+    const target = new URL(value, Astro.url)
+    const isSameOrigin = target.origin === Astro.url.origin
+    const isRelativePath = value.startsWith("/") || (!value.startsWith("http") && target.pathname.startsWith("/"))
+    const isDisallowed = DISALLOWED_REDIRECTS.some((path) => target.pathname === path)
+
+    if (!isSameOrigin || !isRelativePath || isDisallowed) {
+      return null
+    }
+
+    return `${target.pathname}${target.search}${target.hash}`
+  } catch {
+    return null
+  }
+}
+
+const code = (Astro.url.searchParams.get("code") || "").trim() || null
+const redirectParam = Astro.url.searchParams.get("redirect")
+const safeRedirect = sanitizeRedirect(redirectParam)
+const mode = code ? "confirm" : "invalid"
+---
+
+<AuthLayout title="Confirm password reset | Backlog Burner">
+  <main aria-labelledby="reset-confirm-heading">
+    <h1 id="reset-confirm-heading" class="sr-only">Reset your password</h1>
+    <PasswordResetView client:only="react" mode={mode} code={code} redirect={safeRedirect} />
+  </main>
+</AuthLayout>
