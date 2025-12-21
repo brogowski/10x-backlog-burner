@@ -24,15 +24,13 @@ const sanitizeRedirect = (value: string | null): string | null => {
   }
 }
 
-const code = (Astro.url.searchParams.get("code") || "").trim() || null
 const redirectParam = Astro.url.searchParams.get("redirect")
 const safeRedirect = sanitizeRedirect(redirectParam)
-const mode = code ? "confirm" : "invalid"
 ---
 
 <AuthLayout title="Confirm password reset | Backlog Burner">
   <main aria-labelledby="reset-confirm-heading">
     <h1 id="reset-confirm-heading" class="sr-only">Reset your password</h1>
-    <PasswordResetView client:only="react" mode={mode} code={code} redirect={safeRedirect} />
+    <PasswordResetView client:only="react" mode="confirm" redirect={safeRedirect} />
   </main>
 </AuthLayout>

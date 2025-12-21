@@ -57,6 +57,12 @@ export type PasswordResetConfirmValues = {
   confirmPassword: string
 }
 
+export type PasswordResetTokenParams = {
+  accessToken: string
+  refreshToken: string
+  type?: string | null
+}
+
 export type PasswordResetConfirmErrors = {
   password?: string
   confirmPassword?: string
@@ -75,7 +81,7 @@ export type UsePasswordResetConfirmResult = {
   values: PasswordResetConfirmValues
   errors: PasswordResetConfirmErrors
   status: AuthFormStatus
-  invalidCode: boolean
+  invalidToken: boolean
   submit: () => Promise<void>
   setField: (field: "password" | "confirmPassword", value: string) => void
 }

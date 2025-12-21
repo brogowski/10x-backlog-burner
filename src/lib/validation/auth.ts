@@ -19,10 +19,17 @@ const resetRequestSchema = z.object({
   email: emailSchema,
 })
 
-const resetConfirmSchema = z.object({
-  code: z.string().min(1, "Reset code is required"),
-  password: passwordSchema,
-})
+const resetConfirmSchema = z
+  .object({
+    accessToken: z.string().min(1, "Reset link is invalid or expired."),
+    refreshToken: z.string().min(1, "Reset link is invalid or expired."),
+    password: passwordSchema,
+    type: z.string().optional(),
+  })
+  .refine(
+    (payload) => !payload.type || payload.type === "recovery",
+    "Reset link is invalid or expired.",
+  )
 
 export type LoginPayload = z.infer<typeof loginSchema>
 export type SignupPayload = z.infer<typeof signupSchema>

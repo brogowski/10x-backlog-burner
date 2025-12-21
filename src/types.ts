@@ -155,8 +155,13 @@ export type PasswordResetRequestCommand = {
   email: string
 }
 
-export type PasswordResetConfirmCommand = {
-  code: string
+export type PasswordResetTokens = {
+  accessToken: string
+  refreshToken: string
+  type?: string | null
+}
+
+export type PasswordResetConfirmCommand = PasswordResetTokens & {
   password: string
 }
 

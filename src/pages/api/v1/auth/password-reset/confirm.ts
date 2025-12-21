@@ -1,11 +1,10 @@
 import type { APIRoute } from "astro"
 import { createHash } from "node:crypto"
-import { ZodError, z } from "zod"
+import { ZodError } from "zod"
 
 import { appendSessionCookies } from "../../../../../lib/auth/cookies"
 import { createJsonResponse } from "../../../../../lib/http/responses"
 import { logger } from "../../../../../lib/logger"
-import { getServiceSupabaseClient } from "../../../../../db/supabase-server"
 import {
   AuthServiceError,
   confirmPasswordReset,
@@ -20,10 +19,6 @@ type ErrorCode =
   | "auth_failed"
   | "supabase_unavailable"
   | "unknown_error"
-
-const querySchema = z.object({
-  code: z.string().min(1, "Reset link is invalid or expired."),
-})
 
 const jsonSuccess = (payload: unknown) =>
   createJsonResponse(
@@ -51,7 +46,7 @@ const jsonError = (
     },
   )
 
-export const POST: APIRoute = async ({ request, url, locals }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const requestId = locals.requestId ?? "unknown"
 
   let payload: ReturnType<typeof parseResetConfirmPayload>
@@ -96,13 +91,14 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
   }
 
   try {
-    const { user, session } = await confirmPasswordReset(
-      payload,
-      serviceSupabase,
-    )
+    const { user, session } = await confirmPasswordReset(payload, serviceSupabase)
 
     const emailHash = user.email ? hashEmail(user.email) : undefined
     const response = jsonSuccess({ user })
+    if (!session) {
+      logger.error("Password reset confirmed without session", { requestId, emailHash })
+      return jsonError(500, "auth_failed", "Unable to complete password reset.")
+    }
     appendSessionCookies(response.headers, session)
 
     logger.info("Password reset confirmed", { requestId, emailHash })

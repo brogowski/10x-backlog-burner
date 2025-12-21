@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import {
   confirmPasswordReset as confirmPasswordResetApi,
@@ -11,6 +11,7 @@ import type {
   PasswordResetConfirmValues,
   PasswordResetRequestErrors,
   PasswordResetRequestValues,
+  PasswordResetTokenParams,
   UsePasswordResetConfirmResult,
   UsePasswordResetRequestResult,
 } from "@/lib/auth/types"
@@ -59,6 +60,13 @@ const validatePassword = (
 const redirectTo = (target?: string | null) => {
   const next = target || "/in-progress"
   window.location.assign(next)
+}
+
+const isInvalidResetToken = (tokens?: PasswordResetTokenParams | null) => {
+  if (!tokens) return true
+  if (!tokens.accessToken || !tokens.refreshToken) return true
+  if (tokens.type && tokens.type !== "recovery") return true
+  return false
 }
 
 export const usePasswordResetRequest = (
@@ -114,14 +122,21 @@ export const usePasswordResetRequest = (
 }
 
 export const usePasswordResetConfirm = (
-  code: string | null,
+  tokens: PasswordResetTokenParams | null | undefined,
   redirect?: string | null,
 ): UsePasswordResetConfirmResult => {
   const [values, setValues] = useState<PasswordResetConfirmValues>(defaultConfirmValues)
   const [errors, setErrors] = useState<PasswordResetConfirmErrors>({})
   const [status, setStatus] = useState<AuthFormStatus>(createStatus)
 
-  const [invalidCode, setInvalidCode] = useState<boolean>(!code)
+  const [invalidToken, setInvalidToken] = useState<boolean>(
+    tokens === undefined ? false : isInvalidResetToken(tokens),
+  )
+
+  useEffect(() => {
+    if (tokens === undefined) return
+    setInvalidToken(isInvalidResetToken(tokens))
+  }, [tokens])
 
   const setField = useCallback(
     (field: "password" | "confirmPassword", value: string) => {
@@ -137,14 +152,16 @@ export const usePasswordResetConfirm = (
   )
 
   const submit = useCallback(async () => {
-    if (status.isSubmitting || invalidCode) return
+    if (status.isSubmitting) return
+    if (tokens === undefined) return
     const validationErrors = validatePassword(values)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
     }
-    if (!code) {
-      setInvalidCode(true)
+
+    if (!tokens || isInvalidResetToken(tokens)) {
+      setInvalidToken(true)
       setErrors({ general: "Reset link is invalid or expired. Request a new one." })
       return
     }
@@ -153,13 +170,18 @@ export const usePasswordResetConfirm = (
     setErrors({})
 
     try {
-      await confirmPasswordResetApi({ code, password: values.password })
+      await confirmPasswordResetApi({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        password: values.password,
+        type: tokens.type,
+      })
       setStatus({ isSubmitting: false, submitError: null, submitSuccess: true })
       redirectTo(redirect)
     } catch (err) {
       const apiError = err as AuthApiError<string>
       if (apiError.code === "reset_invalid_or_expired") {
-        setInvalidCode(true)
+        setInvalidToken(true)
         setErrors({
           general: "Reset link is invalid or expired. Request a new one.",
         })
@@ -174,13 +196,13 @@ export const usePasswordResetConfirm = (
       setErrors({ general: "Something went wrong. Please try again." })
       setStatus({ isSubmitting: false, submitError: "Something went wrong. Please try again.", submitSuccess: false })
     }
-  }, [code, invalidCode, redirect, status.isSubmitting, values])
+  }, [redirect, status.isSubmitting, tokens, values])
 
   return {
     values,
     errors,
     status,
-    invalidCode,
+    invalidToken,
     submit,
     setField,
   }

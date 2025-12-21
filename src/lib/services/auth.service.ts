@@ -32,9 +32,9 @@ type AuthResult = {
   session: Session | null
 }
 
-const toAuthUser = (sessionOrUser: { id: string; email: string | null }) => ({
+const toAuthUser = (sessionOrUser: { id: string; email?: string | null }) => ({
   id: sessionOrUser.id,
-  email: sessionOrUser.email,
+  email: sessionOrUser.email ?? null,
 })
 
 export const signUpUser = async (
@@ -189,46 +189,45 @@ export const confirmPasswordReset = async (
     )
   }
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(
-    command.code,
-  )
-
-  if (error) {
+  const { accessToken, refreshToken, password, type } = command
+  if (!accessToken || !refreshToken || (type && type !== "recovery")) {
     throw new AuthServiceError(
       "reset_invalid_or_expired",
       "Reset link is invalid or expired.",
-      { code: error.code, message: error.message, status: error.status },
     )
   }
 
-  if (!data.session || !data.user) {
+  const {
+    data: sessionData,
+    error: sessionError,
+  } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  })
+
+  if (sessionError || !sessionData.session || !sessionData.user) {
     throw new AuthServiceError(
-      "auth_failed",
-      "Unable to complete password reset.",
+      "reset_invalid_or_expired",
+      "Reset link is invalid or expired.",
+      sessionError ?? undefined,
     )
   }
 
-  if (command.password) {
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: command.password,
-    })
+  const { error: updateError } = await supabase.auth.updateUser({
+    password,
+  })
 
-    if (updateError) {
-      throw new AuthServiceError(
-        "auth_failed",
-        "Unable to update password.",
-        {
-          code: updateError.code,
-          message: updateError.message,
-          status: updateError.status,
-        },
-      )
-    }
+  if (updateError) {
+    throw new AuthServiceError("auth_failed", "Unable to update password.", {
+      code: updateError.code,
+      message: updateError.message,
+      status: updateError.status,
+    })
   }
 
   return {
-    user: toAuthUser(data.user),
-    session: data.session,
+    user: toAuthUser(sessionData.user),
+    session: sessionData.session,
   }
 }
 
