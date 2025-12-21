@@ -136,3 +136,27 @@ export type CompleteUserGameCommand = {
   achievementsUnlocked?: UserGameUpdate["achievements_unlocked"]
 }
 
+export type AuthUserDTO = {
+  id: string
+  email: string | null
+}
+
+export type SignupCommand = {
+  email: string
+  password: string
+}
+
+export type LoginCommand = {
+  email: string
+  password: string
+}
+
+export type PasswordResetRequestCommand = {
+  email: string
+}
+
+export type PasswordResetConfirmCommand = {
+  code: string
+  password: string
+}
+

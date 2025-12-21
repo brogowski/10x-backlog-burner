@@ -7,15 +7,16 @@ import { createJsonResponse } from "../../../../lib/http/responses"
 import { logger } from "../../../../lib/logger"
 import {
   AuthServiceError,
-  loginUser,
+  signUpUser,
 } from "../../../../lib/services/auth.service"
-import { parseLoginPayload } from "../../../../lib/validation/auth"
+import { parseSignupPayload } from "../../../../lib/validation/auth"
 
 export const prerender = false
 
 type ErrorCode =
   | "validation_error"
   | "invalid_credentials"
+  | "email_exists"
   | "auth_failed"
   | "supabase_unavailable"
   | "unknown_error"
@@ -51,7 +52,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const requestId = locals.requestId ?? "unknown"
 
   if (!locals.supabase) {
-    logger.error("Supabase client missing in POST /v1/auth/login", {
+    logger.error("Supabase client missing in POST /v1/auth/signup", {
       requestId,
     })
     return jsonError(
@@ -61,13 +62,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     )
   }
 
-  let payload: ReturnType<typeof parseLoginPayload>
+  let payload: ReturnType<typeof parseSignupPayload>
   try {
     const body = await request.json()
-    payload = parseLoginPayload(body)
+    payload = parseSignupPayload(body)
   } catch (error) {
     if (error instanceof ZodError) {
-      logger.warn("Invalid login payload", {
+      logger.warn("Invalid signup payload", {
         requestId,
         issues: error.issues,
       })
@@ -76,7 +77,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return jsonError(400, "validation_error", message, error.issues)
     }
 
-    logger.error("Unexpected login payload parsing error", {
+    logger.error("Unexpected signup payload parsing error", {
       requestId,
       cause: error,
     })
@@ -90,30 +91,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const emailHash = hashEmail(payload.email)
 
   try {
-    const { user, session } = await loginUser(payload, locals.supabase)
-    if (!session) {
-      logger.error("Login returned without session", { requestId, emailHash })
-      return jsonError(500, "auth_failed", "Unable to complete login request.")
-    }
+    const { user, session } = await signUpUser(payload, locals.supabase)
     const response = jsonSuccess({ user }, 201)
-    appendSessionCookies(response.headers, session)
+
+    if (session) {
+      appendSessionCookies(response.headers, session)
+    }
+
     return response
   } catch (error) {
     if (error instanceof AuthServiceError) {
-      if (error.code === "invalid_credentials") {
-        logger.warn("Invalid credentials in POST /v1/auth/login", {
-          requestId,
-          emailHash,
-        })
+      if (error.code === "email_exists") {
+        logger.warn("Email already exists on signup", { requestId, emailHash })
         return jsonError(
-          401,
-          "invalid_credentials",
-          "Invalid email or password.",
+          409,
+          "email_exists",
+          "An account with that email already exists.",
         )
       }
 
       if (error.code === "supabase_unavailable") {
-        logger.error("Supabase unavailable during login", {
+        logger.error("Supabase unavailable during signup", {
           requestId,
           emailHash,
           details: error.details,
@@ -125,25 +123,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
         )
       }
 
-      logger.error("Auth failed during login", {
+      logger.error("Auth failed during signup", {
         requestId,
         emailHash,
         code: error.code,
         details: error.details,
       })
-      return jsonError(
-        500,
-        "auth_failed",
-        "Unable to complete login request.",
-        error.details,
-      )
+      return jsonError(500, "auth_failed", "Unable to complete signup.")
     }
 
-    logger.error("Unknown login error", { requestId, emailHash, cause: error })
-    return jsonError(500, "unknown_error", "Unable to complete login request.")
+    logger.error("Unknown signup error", { requestId, emailHash, cause: error })
+    return jsonError(500, "unknown_error", "Unable to complete signup.")
   }
 }
 
 const hashEmail = (email: string) =>
   createHash("sha256").update(email.toLowerCase().trim()).digest("hex")
-
