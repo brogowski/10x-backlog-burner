@@ -1,8 +1,9 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
----
+export const prerender = false
 
-<Layout>
-  <Welcome />
-</Layout>
+type MaybeUser = { id: string; email: string | null } | undefined
+
+const user = Astro.locals.user as MaybeUser
+const destination = user ? "/in-progress" : "/auth"
+
+return Astro.redirect(destination)
