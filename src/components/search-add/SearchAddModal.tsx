@@ -11,6 +11,7 @@ import SortSelect from "./SortSelect"
 import type { CapState, SearchFiltersVM, SortOption } from "./types"
 import { useAddUserGame } from "./useAddUserGame"
 import { useCatalogSearch } from "./useCatalogSearch"
+import { useUserGameMembership } from "./useUserGameMembership"
 import { DEFAULT_FILTERS, useUrlFiltersSync } from "./useUrlFiltersSync"
 import { Button } from "@/components/ui/button"
 
@@ -45,6 +46,11 @@ const SearchAddModal = ({
   const { filters, updateFilters, resetFilters } = useUrlFiltersSync(initialFilters)
   const { results, loading, error, rateLimit, refetch } = useCatalogSearch(filters)
   const { addStatusById, addToBacklog, addToInProgress, error: addError } = useAddUserGame(capState)
+  const {
+    statusById: membershipStatusById,
+    loading: membershipLoading,
+    error: membershipError,
+  } = useUserGameMembership(isOpen)
 
   useEffect(() => {
     if (!isOpen) return
@@ -158,13 +164,23 @@ const SearchAddModal = ({
 
   const resultItems = useMemo(
     () =>
-      results?.results.map((item) => ({
-        ...item,
-        isInBacklog: false,
-        isInProgress: false,
-        addDisabledReason: undefined,
-      })) ?? [],
-    [results?.results],
+      results?.results.map((item) => {
+        const membershipStatus = membershipStatusById[item.steamAppId]
+        const isInProgress = membershipStatus === "in_progress"
+        const isInBacklog = membershipStatus === "backlog"
+
+        return {
+          ...item,
+          isInBacklog,
+          isInProgress,
+          addDisabledReason: isInProgress
+            ? "This game is already in your in-progress queue."
+            : isInBacklog
+              ? "This game is already in your backlog."
+              : undefined,
+        }
+      }) ?? [],
+    [membershipStatusById, results?.results],
   )
 
   if (!isOpen) {
@@ -234,17 +250,17 @@ const SearchAddModal = ({
             onReset={handleResetFilters}
           />
 
-          {(rateLimit?.isRateLimited || addError) && (
+          {(rateLimit?.isRateLimited || addError || membershipError) && (
             <div className="rounded-lg border border-amber-200/70 bg-amber-100/60 px-4 py-3 text-sm text-amber-900">
               {rateLimit?.isRateLimited
                 ? "You have hit the request limit. Please wait before trying again."
-                : addError}
+                : addError ?? membershipError}
             </div>
           )}
 
           <ResultsList
             items={resultItems}
-            isLoading={loading}
+            isLoading={loading || membershipLoading}
             error={error}
             addStatusById={addStatusById}
             capState={capState}

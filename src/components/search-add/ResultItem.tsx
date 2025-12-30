@@ -16,6 +16,18 @@ const ResultItem = ({
   onAddBacklog,
   onAddInProgress,
 }: ResultItemProps) => {
+  const backlogDisabledReason =
+    item.addDisabledReason ??
+    (item.isInProgress
+      ? "This game is already in your in-progress queue."
+      : item.isInBacklog
+        ? "This game is already in your backlog."
+        : undefined)
+
+  const inProgressDisabledReason =
+    item.addDisabledReason ??
+    (item.isInProgress ? "This game is already in your in-progress queue." : undefined)
+
   return (
     <article className="flex gap-4 rounded-lg border border-border bg-background p-4 shadow-sm">
       <div className="h-24 w-20 overflow-hidden rounded-md bg-muted">
@@ -55,13 +67,13 @@ const ResultItem = ({
             mode="backlog"
             status={addStatus}
             onClick={() => onAddBacklog(item.steamAppId)}
-            disabledReason={item.addDisabledReason}
+            disabledReason={backlogDisabledReason}
           />
           <AddButton
             mode="inProgress"
             status={addStatus}
             onClick={() => onAddInProgress(item.steamAppId)}
-            disabledReason={item.addDisabledReason}
+            disabledReason={inProgressDisabledReason}
             capState={capState}
           />
           {item.isInBacklog ? (

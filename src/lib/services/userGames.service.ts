@@ -98,6 +98,20 @@ export const createUserGame = async (
   payload: UserGameInsertPayload,
   supabase: SupabaseClient,
 ): Promise<UserGameDTO> => {
+  validateInProgressPosition(payload.status, payload.inProgressPosition)
+
+  const existing = await findExistingUserGame(payload.userId, payload.gameId, supabase)
+
+  if (existing) {
+    if (existing.status === "removed") {
+      return reviveRemovedUserGame(payload, supabase)
+    }
+
+    throw new UserGamesServiceError("DuplicateEntry", "User game already exists.", {
+      details: { status: existing.status },
+    })
+  }
+
   const { data: game, error: gameError } = await supabase
     .from("games")
     .select("steam_app_id, title, slug, popularity_score")
@@ -110,6 +124,10 @@ export const createUserGame = async (
 
   if (!game) {
     throw new UserGamesServiceError("NotFound", "Game not found.")
+  }
+
+  if (payload.status === "in_progress") {
+    await ensureInProgressCapacity(payload.userId, supabase)
   }
 
   const { data, error } = await supabase
@@ -438,6 +456,87 @@ const createUserGamesServiceError = (
 const assertSelection = (row: unknown): UserGameSelection => row as UserGameSelection
 
 const isUniqueViolation = (error: PostgrestError) => error.code === "23505"
+
+const findExistingUserGame = async (
+  userId: string,
+  gameId: number,
+  supabase: SupabaseClient,
+): Promise<UserGameSelection | null> => {
+  const { data, error } = await supabase
+    .from("user_games")
+    .select(
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
+    )
+    .eq("user_id", userId)
+    .eq("game_id", gameId)
+    .maybeSingle()
+
+  if (error) {
+    throw createUserGamesServiceError(error, "BacklogFetchFailed")
+  }
+
+  return data ? assertSelection(data) : null
+}
+
+const reviveRemovedUserGame = async (
+  payload: UserGameInsertPayload,
+  supabase: SupabaseClient,
+): Promise<UserGameDTO> => {
+  if (payload.status === "in_progress") {
+    await ensureInProgressCapacity(payload.userId, supabase)
+  }
+
+  const { data, error } = await supabase
+    .from("user_games")
+    .update({
+      status: payload.status,
+      in_progress_position: payload.inProgressPosition,
+      removed_at: null,
+      completed_at: null,
+    })
+    .eq("user_id", payload.userId)
+    .eq("game_id", payload.gameId)
+    .select(
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
+    )
+    .single()
+
+  if (error) {
+    if (isUniqueViolation(error)) {
+      throw new UserGamesServiceError(
+        "DuplicatePositions",
+        "Conflicting in-progress positions.",
+        { details: error },
+      )
+    }
+
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+  }
+
+  return mapRowToDto(assertSelection(data))
+}
+
+const validateInProgressPosition = (
+  status: GamePlayStatus,
+  position: number | null,
+): void => {
+  if (status === "in_progress") {
+    if (position === null || position === undefined) {
+      throw new UserGamesServiceError(
+        "PositionRequiredForInProgress",
+        "inProgressPosition is required when status is in_progress.",
+      )
+    }
+    return
+  }
+
+  if (position !== null && position !== undefined) {
+    throw new UserGamesServiceError(
+      "PositionRequiredForInProgress",
+      "inProgressPosition must be null unless status is in_progress.",
+    )
+  }
+}
 
 const fetchUserGame = async (
   userId: string,
