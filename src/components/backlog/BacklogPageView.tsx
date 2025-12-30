@@ -1,15 +1,25 @@
-import { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import BacklogEmptyState from "@/components/backlog/BacklogEmptyState"
 import BacklogList from "@/components/backlog/BacklogList"
 import PaginationControl from "@/components/backlog/PaginationControl"
 import AddGamesButton from "@/components/in-progress/AddGamesButton"
 import InlineErrorBanner from "@/components/in-progress/InlineErrorBanner"
+import SearchAddModal from "@/components/search-add/SearchAddModal"
 import { useBacklog } from "@/components/backlog/useBacklog"
-
-const ADD_GAMES_PATH = "/backlog/add"
+import { fetchInProgressCount } from "@/lib/backlog/backlogApi"
+import { IN_PROGRESS_CAP } from "@/lib/in-progress/types"
+import type { CapState } from "@/components/search-add/types"
 
 const BacklogPageView = () => {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [capState, setCapState] = useState<CapState>({
+    max: IN_PROGRESS_CAP,
+    current: 0,
+    canAdd: true,
+    notice: undefined,
+  })
+
   const {
     backlog,
     loading,
@@ -24,8 +34,31 @@ const BacklogPageView = () => {
   } = useBacklog()
 
   const handleAddGames = useCallback(() => {
-    window.location.assign(ADD_GAMES_PATH)
+    setIsSearchOpen(true)
   }, [])
+
+  useEffect(() => {
+    if (!isSearchOpen) return
+    const controller = new AbortController()
+
+    const loadCap = async () => {
+      try {
+        const { count } = await fetchInProgressCount(controller.signal)
+        const next = {
+          max: IN_PROGRESS_CAP,
+          current: count,
+          canAdd: count < IN_PROGRESS_CAP,
+          notice: count >= IN_PROGRESS_CAP ? "Your in-progress queue is full. Finish a game to add another." : undefined,
+        }
+        setCapState(next)
+      } catch {
+        // Keep default cap state; errors are non-blocking.
+      }
+    }
+
+    loadCap()
+    return () => controller.abort()
+  }, [isSearchOpen])
 
   return (
     <section className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-10">
@@ -80,6 +113,12 @@ const BacklogPageView = () => {
           ) : null}
         </>
       )}
+
+      <SearchAddModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        capState={capState}
+      />
     </section>
   )
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import AddGamesButton from "@/components/in-progress/AddGamesButton"
 import EmptyState from "@/components/in-progress/EmptyState"
@@ -6,9 +6,12 @@ import HeaderCapBadge from "@/components/in-progress/HeaderCapBadge"
 import InlineErrorBanner from "@/components/in-progress/InlineErrorBanner"
 import InProgressList from "@/components/in-progress/InProgressList"
 import { useInProgressQueue } from "@/components/in-progress/useInProgressQueue"
+import SearchAddModal from "@/components/search-add/SearchAddModal"
+import type { CapState } from "@/components/search-add/types"
 import type { InProgressGameItemVM } from "@/lib/in-progress/types"
 
 const InProgressPageView = () => {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const {
     queue,
     loading,
@@ -32,8 +35,21 @@ const InProgressPageView = () => {
       : "Keep your active games organized and finish faster."
   }, [queue])
 
+  const capState = useMemo<CapState>(
+    () => ({
+      max: queue?.cap ?? 5,
+      current: queue?.total ?? 0,
+      canAdd: (queue?.total ?? 0) < (queue?.cap ?? 5),
+      notice:
+        queue && queue.isAtCap
+          ? "You’ve reached the in-progress cap. Finish a game to add another."
+          : undefined,
+    }),
+    [queue],
+  )
+
   const handleAddGames = useCallback(() => {
-    window.location.assign("/")
+    setIsSearchOpen(true)
   }, [])
 
   const handleReorder = useCallback(
@@ -94,6 +110,12 @@ const InProgressPageView = () => {
       ) : (
         <EmptyState onAddClick={handleAddGames} isAtCap={Boolean(queue?.isAtCap)} />
       )}
+
+      <SearchAddModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        capState={capState}
+      />
     </section>
   )
 }
