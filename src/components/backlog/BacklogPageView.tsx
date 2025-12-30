@@ -37,6 +37,11 @@ const BacklogPageView = () => {
     setIsSearchOpen(true)
   }, [])
 
+  const handleCloseSearch = useCallback(() => {
+    setIsSearchOpen(false)
+    refetch()
+  }, [refetch])
+
   useEffect(() => {
     if (!isSearchOpen) return
     const controller = new AbortController()
@@ -116,7 +121,7 @@ const BacklogPageView = () => {
 
       <SearchAddModal
         isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
+        onClose={handleCloseSearch}
         capState={capState}
       />
     </section>

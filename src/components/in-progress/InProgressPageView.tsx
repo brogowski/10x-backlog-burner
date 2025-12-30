@@ -52,6 +52,11 @@ const InProgressPageView = () => {
     setIsSearchOpen(true)
   }, [])
 
+  const handleCloseSearch = useCallback(() => {
+    setIsSearchOpen(false)
+    refetch()
+  }, [refetch])
+
   const handleReorder = useCallback(
     (items: InProgressGameItemVM[]) => {
       reorderQueue(items)
@@ -113,7 +118,7 @@ const InProgressPageView = () => {
 
       <SearchAddModal
         isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
+        onClose={handleCloseSearch}
         capState={capState}
       />
     </section>
