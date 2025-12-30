@@ -25,12 +25,22 @@ const user = Astro.locals.user as MaybeUser
       {user ? (
         <header class="sticky top-0 z-10 border-b border-border/80 bg-background/80 backdrop-blur">
           <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-6 py-3">
-            <a
-              class="text-sm font-semibold tracking-tight text-foreground transition hover:text-foreground/80"
-              href="/in-progress"
-            >
-              Backlog Burner
-            </a>
+            <div class="flex items-center gap-8">
+              <a
+                class="text-sm font-semibold tracking-tight text-foreground transition hover:text-foreground/80"
+                href="/in-progress"
+              >
+                Backlog Burner
+              </a>
+              <nav class="flex items-center gap-5 text-sm font-medium text-foreground/80" aria-label="Main navigation">
+                <a class="transition hover:text-foreground" href="/in-progress">
+                  In progress
+                </a>
+                <a class="transition hover:text-foreground" href="/backlog">
+                  Backlog
+                </a>
+              </nav>
+            </div>
             <div class="flex items-center gap-3">
               <span class="truncate text-sm text-foreground/80" title={user.email ?? "Signed in"}>
                 {user.email ?? "Signed in"}
