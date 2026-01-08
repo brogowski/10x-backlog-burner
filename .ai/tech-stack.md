@@ -10,3 +10,7 @@ Backend - Supabase jako kompleksowe rozwiązanie backendowe:
 - Zapewnia SDK w wielu językach, które posłużą jako Backend-as-a-Service
 - Jest rozwiązaniem open source, które można hostować lokalnie lub na własnym serwerze
 - Posiada wbudowaną autentykację użytkowników
+
+Testowanie - podejście i narzędzia:
+- Vitest + Testing Library do testów jednostkowych i integracyjnych komponentów UI i serwisów (opisane w `.ai/test-plan.md`)
+- Playwright do testów end-to-end imitujących przepływy użytkowników w przeglądarkach Chromium/Firefox

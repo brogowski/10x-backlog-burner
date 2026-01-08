@@ -25,6 +25,9 @@ Backlog Burner is a web application that helps PC gamers organize, prioritize, a
 - Frontend: Astro 5, React 19, TypeScript 5, Tailwind 4, shadcn/ui
 - Backend: Supabase (PostgreSQL, SDK, built‑in authentication)
 - Tooling: ESLint, Prettier, lint-staged, Husky
+- Testing:
+  - Unit + integration: Vitest with Testing Library for component and service coverage
+  - End-to-end: Playwright for full flow validation in real browsers
 
 For additional notes, see: [`.ai/tech-stack.md`](./.ai/tech-stack.md)
 
@@ -71,6 +74,16 @@ npm run preview
 - `npm run lint`: Lint the codebase
 - `npm run lint:fix`: Lint and fix issues automatically
 - `npm run format`: Format files with Prettier
+- `npm run test`: Run Vitest once for unit and integration suites
+- `npm run test:watch`: Run Vitest in watch mode for TDD work
+- `npm run test:ui`: Launch the Vitest UI to explore suites interactively
+- `npm run test:e2e`: Run Playwright against the Chromium desktop flow
+- `npm run test:e2e:headed`: Same as `test:e2e` but with the headed browser
+- `npm run test:e2e:trace`: Run Playwright with trace capture enabled
+
+## Testing
+- **Unit/Integration**: Vitest (configured in `vitest.config.ts`) runs against `tests/unit`, uses jsdom, shared setup helpers in `src/test/setup.ts`, and `@testing-library` helpers for component/rendered-service assertions.
+- **End-to-end**: Playwright (configured in `playwright.config.ts`) targets Chromium via `tests/e2e`, spins up `npm run dev` automatically, relies on page objects under `tests/e2e/pages`, and captures screenshots/traces on failures.
 
 ## Project scope
 The MVP scope and boundaries are defined in the PRD. Highlights:
