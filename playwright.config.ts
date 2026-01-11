@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
-
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -35,10 +37,14 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'cleanup db',
+      testMatch: /global\.teardown\.ts/,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
+    /*
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
@@ -48,7 +54,7 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
+    */
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
@@ -72,7 +78,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
    webServer: {
-     command: 'npm run dev',
+     command: 'npm run dev:e2e',
      url: 'http://localhost:3000',
      reuseExistingServer: !process.env.CI,
    },
