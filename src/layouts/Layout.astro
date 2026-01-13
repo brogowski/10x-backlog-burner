@@ -69,7 +69,7 @@ const user = Astro.locals.user as MaybeUser;
       user ? (
         <script>
           const logoutButton = document.querySelector("[data-logout-button]");
-          if (logoutButton instanceof HTMLButtonElement){ return " "; }
+          if (logoutButton instanceof HTMLButtonElement){" "}
           {logoutButton.addEventListener("click", async () => {
             logoutButton.disabled = true;
             logoutButton.setAttribute("aria-busy", "true");
