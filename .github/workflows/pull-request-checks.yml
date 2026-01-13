@@ -87,7 +87,7 @@ jobs:
             const summary = results.map((r) => `- **${r.name}**: ${r.status}`).join('\n');
             const body = [header, summary, ''].join('\n');
             await github.rest.issues.createComment({
-              issue_number: github.context.issue.number,
+              issue_number: github.event.pull_request.number,
               owner: github.context.repo.owner,
               repo: github.context.repo.repo,
               body,
