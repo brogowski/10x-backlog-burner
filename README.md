@@ -27,7 +27,7 @@ Backlog Burner is a web application that helps PC gamers organize, prioritize, a
 - Tooling: ESLint, Prettier, lint-staged, Husky
 - Testing:
   - Unit + integration: Vitest with Testing Library for component and service coverage
-  - End-to-end: Playwright for full flow validation in real browsers (chromium)
+  - End-to-end: Playwright for full flow validation in real browsers
 
 For additional notes, see: [`.ai/tech-stack.md`](./.ai/tech-stack.md)
 
