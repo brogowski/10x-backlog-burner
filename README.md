@@ -48,6 +48,7 @@ nvm use
 ### Install dependencies
 ```bash
 npm install
+npx playwright install --with-deps chromium
 ```
 
 ### Start the dev server
