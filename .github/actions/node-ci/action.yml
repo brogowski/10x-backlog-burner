@@ -18,8 +18,8 @@ runs:
 
     - name: Install dependencies
       run: npm ci
-      working-directory: .
+      shell: bash
 
     - name: Run script
       run: ${{ inputs.script }}
-      working-directory: ,
+      shell: bash
