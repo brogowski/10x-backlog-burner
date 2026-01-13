@@ -1,10 +1,10 @@
 ---
-export const prerender = false
+export const prerender = false;
 
-type MaybeUser = { id: string; email: string | null } | undefined
+type MaybeUser = { id: string; email: string | null } | undefined;
 
-const user = Astro.locals.user as MaybeUser
-const destination = user ? "/in-progress" : "/auth"
+const user = Astro.locals.user as MaybeUser;
+const destination = user ? "/in-progress" : "/auth";
 
-return Astro.redirect(destination)
+return Astro.redirect(destination);
 ---

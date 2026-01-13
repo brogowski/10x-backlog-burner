@@ -32,9 +32,9 @@ export interface AuthFormStatus {
   submitSuccess?: boolean;
 }
 
-export interface UseAuthFormResult<TValues extends Record<string, unknown>> {
+export interface UseAuthFormResult<TValues> {
   values: TValues;
-  errors: Partial<Record<keyof TValues | "general", string>>;
+  errors: Partial<Record<string, string>>;
   status: AuthFormStatus;
   setFieldValue: <K extends keyof TValues>(field: K, value: TValues[K]) => void;
   handleSubmit: (ev: FormEvent<HTMLFormElement>) => void;

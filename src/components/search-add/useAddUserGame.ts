@@ -114,7 +114,7 @@ export const useAddUserGame = (capState: CapState): UseAddUserGameResult => {
         setError(err instanceof Error ? err.message : "Unable to add to in-progress.");
       }
     },
-    [capState.canAdd, capState.current, capState.max, capState.notice, updateStatus]
+    [capState, updateStatus]
   );
 
   return {

@@ -72,15 +72,6 @@ const mapAuthError = (mode: AuthMode, error: AuthApiError<string>): string | und
   return "Something went wrong. Please try again.";
 };
 
-const clearFieldError = <T extends Record<string, unknown>>(
-  errors: Partial<Record<keyof T | "general", string>>,
-  field: keyof T
-) => {
-  if (!errors[field]) return errors;
-  const { [field]: _, ...next } = errors;
-  return next;
-};
-
 export const useAuthForm = (
   mode: AuthMode,
   redirect?: string | null
@@ -92,7 +83,12 @@ export const useAuthForm = (
 
   const setFieldValue = useCallback(<K extends keyof typeof values>(field: K, value: (typeof values)[K]) => {
     setValues((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => clearFieldError(prev, field));
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: removed, ...next } = prev;
+      void removed;
+      return next;
+    });
   }, []);
 
   const validate = useCallback(

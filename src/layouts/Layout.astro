@@ -68,10 +68,8 @@ const user = Astro.locals.user as MaybeUser;
     {
       user ? (
         <script>
-          const logoutButton = document.querySelector("[data-logout-button]") 
-          if (logoutButton instanceof HTMLButtonElement) {
-            " "
-          }
+          const logoutButton = document.querySelector("[data-logout-button]");
+          if (logoutButton instanceof HTMLButtonElement){ return " "; }
           {logoutButton.addEventListener("click", async () => {
             logoutButton.disabled = true;
             logoutButton.setAttribute("aria-busy", "true");
@@ -79,7 +77,7 @@ const user = Astro.locals.user as MaybeUser;
               await fetch("/api/v1/auth/logout", {
                 method: "POST",
                 credentials: "include",
-                headers: {
+        headers: {
                   "Content-Type": "application/json",
                 },
               });
@@ -88,7 +86,8 @@ const user = Astro.locals.user as MaybeUser;
             } finally {
               window.location.assign("/auth");
             }
-          })}
+          })
+}
         </script>
       ) : null
     }

@@ -1,4 +1,4 @@
-import type { GamesListDTO, GameSummaryDTO } from "@/types";
+import type { GameSummaryDTO } from "@/types";
 
 export type SortOption = "popularity" | "release_date_desc" | "title_asc";
 

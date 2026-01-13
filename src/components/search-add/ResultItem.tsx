@@ -25,7 +25,6 @@ const ResultItem = ({ item, addStatus, capState, onAddBacklog, onAddInProgress }
     <article className="flex gap-4 rounded-lg border border-border bg-background p-4 shadow-sm">
       <div className="h-24 w-20 overflow-hidden rounded-md bg-muted">
         {item.artworkUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={item.artworkUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-foreground/50">No art</div>

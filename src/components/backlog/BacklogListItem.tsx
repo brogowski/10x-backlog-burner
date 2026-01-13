@@ -12,9 +12,7 @@ interface BacklogListItemProps {
 
 const BacklogListItem = ({ item, activeState, onAddToInProgress, onRemove }: BacklogListItemProps) => {
   return (
-    <li
-      className="flex flex-col gap-3 rounded-lg border border-border bg-background px-4 py-3 shadow-sm"
-    >
+    <li className="flex flex-col gap-3 rounded-lg border border-border bg-background px-4 py-3 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <GameRow
           steamAppId={item.steamAppId}

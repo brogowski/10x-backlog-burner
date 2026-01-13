@@ -76,8 +76,8 @@ export const usePasswordResetRequest = (): UsePasswordResetRequestResult => {
     setValues({ email: value });
     setErrors((prev) => {
       if (!prev.email) return prev;
-      const next = { ...prev };
-      delete next.email;
+      const { email: removed, ...next } = prev;
+      void removed;
       return next;
     });
   }, []);
@@ -136,8 +136,8 @@ export const usePasswordResetConfirm = (
     setValues((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => {
       if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
+      const { [field]: removed, ...next } = prev;
+      void removed;
       return next;
     });
   }, []);
