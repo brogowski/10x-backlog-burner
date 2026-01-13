@@ -68,6 +68,7 @@ npm run preview
 
 ## Available scripts
 - `npm run dev`: Start the Astro dev server
+- `dev:e2e`: Start the Astro dev server with test enviorment configuration
 - `npm run build`: Build the site for production
 - `npm run preview`: Preview the production build locally
 - `npm run astro`: Run Astro CLI directly
