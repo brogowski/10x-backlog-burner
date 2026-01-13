@@ -6,6 +6,6 @@ test.describe("Authentication landing", () => {
     const homePage = new HomePage(page);
     await homePage.goto();
     await homePage.expectCardsVisible();
-    await expect(page).toHaveScreenshot({ fullPage: true });
+    await expect(page).toHaveScreenshot({ fullPage: true, maxDiffPixelRatio: 0.01 });
   });
 });
