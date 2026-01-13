@@ -4,8 +4,8 @@ import { BacklogPage } from "./pages/BacklogPage";
 import { HomePage } from "./pages/HomePage";
 import { SearchAddModalPage } from "./pages/SearchAddModalPage";
 
-const E2E_USERNAME = process.env.E2E_USERNAME;
-const E2E_PASSWORD = process.env.E2E_PASSWORD;
+const E2E_USERNAME = process.env.E2E_USERNAME ?? "";
+const E2E_PASSWORD = process.env.E2E_PASSWORD ?? "";
 const TARGET_GAME = "Dota 2";
 
 test.describe("Backlog flow", () => {
@@ -15,7 +15,7 @@ test.describe("Backlog flow", () => {
     const homePage = new HomePage(page);
     await homePage.goto();
     await homePage.expectCardsVisible();
-    await homePage.login(E2E_USERNAME!, E2E_PASSWORD!);
+    await homePage.login(E2E_USERNAME, E2E_PASSWORD);
     await page.waitForURL("**/in-progress", { timeout: 10_000 });
 
     const backlogPage = new BacklogPage(page);

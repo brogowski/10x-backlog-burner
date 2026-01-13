@@ -77,8 +77,7 @@ const clearFieldError = <T extends Record<string, unknown>>(
   field: keyof T
 ) => {
   if (!errors[field]) return errors;
-  const next = { ...errors };
-  delete next[field];
+  const { [field]: _, ...next } = errors;
   return next;
 };
 

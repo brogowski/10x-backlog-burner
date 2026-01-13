@@ -81,7 +81,7 @@ const cleanUpUserGames = async (supabaseUrl: string, supabaseKey: string) => {
   log.info(`Removed ${deletedRows?.length ?? 0} backlog entries for ${userId}.`);
 };
 
-test("delete database", async ({}) => {
+test("delete database", async () => {
   const supabaseUrl = getEnvVar("SUPABASE_URL");
   const supabaseKey = getEnvVar("SUPABASE_KEY");
   if (!supabaseUrl || !supabaseKey) {

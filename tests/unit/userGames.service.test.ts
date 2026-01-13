@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { PostgrestError as PostgrestErrorType } from "@supabase/supabase-js";
 import { PostgrestError } from "@supabase/postgrest-js";
 import type { SupabaseClient } from "@/db/supabase.client";
-import { reorderInProgress, UserGamesServiceError } from "@/lib/services/userGames.service";
+import { reorderInProgress } from "@/lib/services/userGames.service";
 
 interface ExecutionResult {
   data?: unknown;
@@ -63,7 +63,6 @@ describe("reorderInProgress", () => {
   });
 
   it("fails when the submitted queue does not match the stored queue", async () => {
-    const items = [{ steamAppId: 101, position: 1 }];
     const existing = [{ game_id: 101, in_progress_position: 1 }];
     const { supabase, updateCalls } = createSupabaseMock([{ data: existing, error: null }]);
 

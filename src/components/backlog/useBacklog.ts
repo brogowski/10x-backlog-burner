@@ -146,8 +146,7 @@ export const useBacklog = (): UseBacklogResult => {
 
   useEffect(() => {
     loadInitial();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadInitial]);
 
   const value: UseBacklogResult = useMemo(
     () => ({

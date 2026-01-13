@@ -88,7 +88,7 @@ const InProgressList = ({
         <div aria-live="polite" className="sr-only">
           {announcement}
         </div>
-        <ol className="space-y-3" role="list" aria-label="In-progress games">
+        <ol className="space-y-3" aria-label="In-progress games">
           {items.map((item, index) => (
             <SortableListItem
               key={item.steamAppId}
@@ -125,7 +125,6 @@ interface SortableListItemProps {
 
 const SortableListItem = ({
   item,
-  index,
   isMutating,
   isReordering,
   onMoveUp,

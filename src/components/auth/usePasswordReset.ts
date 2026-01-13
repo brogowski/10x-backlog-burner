@@ -67,7 +67,7 @@ const isInvalidResetToken = (tokens?: PasswordResetTokenParams | null) => {
   return false;
 };
 
-export const usePasswordResetRequest = (_redirect?: string | null): UsePasswordResetRequestResult => {
+export const usePasswordResetRequest = (): UsePasswordResetRequestResult => {
   const [values, setValues] = useState<PasswordResetRequestValues>(defaultRequestValues);
   const [errors, setErrors] = useState<PasswordResetRequestErrors>({});
   const [status, setStatus] = useState<AuthFormStatus>(createStatus);

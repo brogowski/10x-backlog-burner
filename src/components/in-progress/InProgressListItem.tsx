@@ -1,4 +1,4 @@
-import { CSS } from "@dnd-kit/utilities";
+import { CSS, type Transform } from "@dnd-kit/utilities";
 
 import CompleteButton from "@/components/in-progress/CompleteButton";
 import GameRow from "@/components/in-progress/GameRow";
@@ -19,7 +19,7 @@ interface InProgressListItemProps {
   setNodeRef: (node: HTMLElement | null) => void;
   attributes: Record<string, unknown>;
   listeners: Record<string, unknown>;
-  transform: any;
+  transform: Transform;
   transition: string | undefined;
 }
 
@@ -40,7 +40,6 @@ const InProgressListItem = ({
   transition,
 }: InProgressListItemProps) => (
   <li
-    role="listitem"
     className="flex flex-col gap-3 rounded-lg border border-border bg-background px-4 py-3 shadow-sm"
     ref={setNodeRef}
     style={{

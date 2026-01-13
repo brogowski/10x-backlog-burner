@@ -10,7 +10,7 @@ interface BacklogListProps {
 
 const BacklogList = ({ items, onAddToInProgress, onRemove, activeItemMutations }: BacklogListProps) => {
   return (
-    <ul role="list" className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3">
       {items.map((item) => (
         <BacklogListItem
           key={item.steamAppId}
