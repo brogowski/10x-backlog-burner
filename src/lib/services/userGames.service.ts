@@ -339,7 +339,7 @@ export const completeUserGame = async (
 };
 
 export const removeUserGame = async (userId: string, steamAppId: number, supabase: SupabaseClient): Promise<void> => {
-  const existing = await fetchUserGame(userId, steamAppId, supabase);
+  await fetchUserGame(userId, steamAppId, supabase);
 
   const { error } = await supabase
     .from("user_games")

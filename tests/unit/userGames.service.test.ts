@@ -14,7 +14,7 @@ const createSupabaseMock = (results: ExecutionResult[]) => {
   const updateCalls: Record<string, unknown>[] = [];
 
   const makeBuilder = () => {
-    const builder: Record<string, any> = {
+    const builder: Record<string, unknown> = {
       select: () => builder,
       update: (payload: Record<string, unknown>) => {
         updateCalls.push(payload);
