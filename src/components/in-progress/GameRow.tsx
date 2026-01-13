@@ -1,39 +1,25 @@
-import { cn } from "@/lib/utils"
-import type { GamePlayStatus } from "@/types"
+import { cn } from "@/lib/utils";
+import type { GamePlayStatus } from "@/types";
 
-type GameRowProps = {
-  title: string
-  artworkUrl?: string | null
-  achievementsUnlocked?: number | null
-  achievementsTotal?: number | null
-  status: GamePlayStatus
-  position?: number
+interface GameRowProps {
+  title: string;
+  artworkUrl?: string | null;
+  achievementsUnlocked?: number | null;
+  achievementsTotal?: number | null;
+  status: GamePlayStatus;
+  position?: number;
 }
 
-const GameRow = ({
-  title,
-  artworkUrl,
-  achievementsUnlocked,
-  achievementsTotal,
-  status,
-  position,
-}: GameRowProps) => {
+const GameRow = ({ title, artworkUrl, achievementsUnlocked, achievementsTotal, status, position }: GameRowProps) => {
   const showAchievements =
-    typeof achievementsTotal === "number" &&
-    achievementsTotal > 0 &&
-    typeof achievementsUnlocked === "number"
+    typeof achievementsTotal === "number" && achievementsTotal > 0 && typeof achievementsUnlocked === "number";
 
   return (
     <div className="flex items-center gap-3">
       <div className="relative">
         <div className="h-12 w-12 overflow-hidden rounded-md bg-muted">
           {artworkUrl ? (
-            <img
-              src={artworkUrl}
-              alt={`${title} cover art`}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+            <img src={artworkUrl} alt={`${title} cover art`} loading="lazy" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-foreground/60">
               {position ?? ""}
@@ -53,8 +39,7 @@ const GameRow = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GameRow
-
+export default GameRow;

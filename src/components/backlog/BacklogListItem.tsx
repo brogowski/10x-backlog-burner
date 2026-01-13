@@ -1,13 +1,13 @@
-import AddToInProgressButton from "@/components/backlog/AddToInProgressButton"
-import GameRow from "@/components/backlog/GameRow"
-import RemoveFromBacklogButton from "@/components/backlog/RemoveFromBacklogButton"
-import type { BacklogGameItemVM } from "@/lib/backlog/types"
+import AddToInProgressButton from "@/components/backlog/AddToInProgressButton";
+import GameRow from "@/components/backlog/GameRow";
+import RemoveFromBacklogButton from "@/components/backlog/RemoveFromBacklogButton";
+import type { BacklogGameItemVM } from "@/lib/backlog/types";
 
-type BacklogListItemProps = {
-  item: BacklogGameItemVM
-  activeState: "addToInProgress" | "remove" | "idle"
-  onAddToInProgress: (item: BacklogGameItemVM) => void
-  onRemove: (item: BacklogGameItemVM) => void
+interface BacklogListItemProps {
+  item: BacklogGameItemVM;
+  activeState: "addToInProgress" | "remove" | "idle";
+  onAddToInProgress: (item: BacklogGameItemVM) => void;
+  onRemove: (item: BacklogGameItemVM) => void;
 }
 
 const BacklogListItem = ({ item, activeState, onAddToInProgress, onRemove }: BacklogListItemProps) => {
@@ -42,8 +42,7 @@ const BacklogListItem = ({ item, activeState, onAddToInProgress, onRemove }: Bac
         </div>
       </div>
     </li>
-  )
-}
+  );
+};
 
-export default BacklogListItem
-
+export default BacklogListItem;

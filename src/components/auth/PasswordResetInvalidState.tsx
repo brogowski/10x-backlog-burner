@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-type PasswordResetInvalidStateProps = {
-  message?: string
+interface PasswordResetInvalidStateProps {
+  message?: string;
 }
 
 const PasswordResetInvalidState = ({
@@ -14,7 +14,7 @@ const PasswordResetInvalidState = ({
         <a href="/reset-password">Request a new link</a>
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export default PasswordResetInvalidState
+export default PasswordResetInvalidState;

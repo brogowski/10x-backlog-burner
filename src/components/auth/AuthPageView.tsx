@@ -1,26 +1,26 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-import AuthCard from "@/components/auth/AuthCard"
-import AuthTabs from "@/components/auth/AuthTabs"
-import { useAuthForm } from "@/components/auth/useAuthForm"
-import type { AuthMode } from "@/lib/auth/types"
+import AuthCard from "@/components/auth/AuthCard";
+import AuthTabs from "@/components/auth/AuthTabs";
+import { useAuthForm } from "@/components/auth/useAuthForm";
+import type { AuthMode } from "@/lib/auth/types";
 
-export type AuthPageViewProps = {
-  redirect?: string | null
-  mode?: AuthMode
+export interface AuthPageViewProps {
+  redirect?: string | null;
+  mode?: AuthMode;
 }
 
 const AuthPageView = ({ redirect, mode = "login" }: AuthPageViewProps) => {
-  const [activeTab, setActiveTab] = useState<AuthMode>(mode === "signup" ? "signup" : "login")
+  const [activeTab, setActiveTab] = useState<AuthMode>(mode === "signup" ? "signup" : "login");
 
-  const loginForm = useAuthForm("login", redirect)
-  const signupForm = useAuthForm("signup", redirect)
+  const loginForm = useAuthForm("login", redirect);
+  const signupForm = useAuthForm("signup", redirect);
 
   useEffect(() => {
     if (mode && (mode === "login" || mode === "signup")) {
-      setActiveTab(mode)
+      setActiveTab(mode);
     }
-  }, [mode])
+  }, [mode]);
 
   return (
     <AuthCard
@@ -40,7 +40,7 @@ const AuthPageView = ({ redirect, mode = "login" }: AuthPageViewProps) => {
           status: loginForm.status,
           onChange: loginForm.setFieldValue,
           onSubmit: async () => {
-            await loginForm.submit()
+            await loginForm.submit();
           },
         }}
         signupFormProps={{
@@ -49,12 +49,12 @@ const AuthPageView = ({ redirect, mode = "login" }: AuthPageViewProps) => {
           status: signupForm.status,
           onChange: signupForm.setFieldValue,
           onSubmit: async () => {
-            await signupForm.submit()
+            await signupForm.submit();
           },
         }}
       />
     </AuthCard>
-  )
-}
+  );
+};
 
-export default AuthPageView
+export default AuthPageView;

@@ -1,34 +1,24 @@
-import FormErrorAlert from "@/components/auth/FormErrorAlert"
-import PasswordInput from "@/components/auth/PasswordInput"
-import PasswordRequirementsHint from "@/components/auth/PasswordRequirementsHint"
-import SubmitButton from "@/components/auth/SubmitButton"
-import type {
-  AuthFormStatus,
-  PasswordResetConfirmErrors,
-  PasswordResetConfirmValues,
-} from "@/lib/auth/types"
+import FormErrorAlert from "@/components/auth/FormErrorAlert";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PasswordRequirementsHint from "@/components/auth/PasswordRequirementsHint";
+import SubmitButton from "@/components/auth/SubmitButton";
+import type { AuthFormStatus, PasswordResetConfirmErrors, PasswordResetConfirmValues } from "@/lib/auth/types";
 
-type PasswordResetConfirmFormProps = {
-  values: PasswordResetConfirmValues
-  errors: PasswordResetConfirmErrors
-  status: AuthFormStatus
-  onChange: (field: "password" | "confirmPassword", value: string) => void
-  onSubmit: (values: PasswordResetConfirmValues) => Promise<void>
+interface PasswordResetConfirmFormProps {
+  values: PasswordResetConfirmValues;
+  errors: PasswordResetConfirmErrors;
+  status: AuthFormStatus;
+  onChange: (field: "password" | "confirmPassword", value: string) => void;
+  onSubmit: (values: PasswordResetConfirmValues) => Promise<void>;
 }
 
-const PasswordResetConfirmForm = ({
-  values,
-  errors,
-  status,
-  onChange,
-  onSubmit,
-}: PasswordResetConfirmFormProps) => {
+const PasswordResetConfirmForm = ({ values, errors, status, onChange, onSubmit }: PasswordResetConfirmFormProps) => {
   return (
     <form
       className="space-y-4"
       onSubmit={(ev) => {
-        ev.preventDefault()
-        void onSubmit(values)
+        ev.preventDefault();
+        void onSubmit(values);
       }}
       noValidate
     >
@@ -52,13 +42,9 @@ const PasswordResetConfirmForm = ({
 
       <FormErrorAlert message={errors.general} />
 
-      <SubmitButton
-        label="Update password"
-        isLoading={status.isSubmitting}
-        disabled={status.isSubmitting}
-      />
+      <SubmitButton label="Update password" isLoading={status.isSubmitting} disabled={status.isSubmitting} />
     </form>
-  )
-}
+  );
+};
 
-export default PasswordResetConfirmForm
+export default PasswordResetConfirmForm;

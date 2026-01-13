@@ -1,24 +1,20 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
-import type { SearchFiltersVM, SortOption } from "./types"
+import type { SearchFiltersVM, SortOption } from "./types";
 
-type AppliedFiltersBarProps = {
-  filters: SearchFiltersVM
-  onRemove: (key: keyof SearchFiltersVM, value?: string) => void
-  onReset: () => void
+interface AppliedFiltersBarProps {
+  filters: SearchFiltersVM;
+  onRemove: (key: keyof SearchFiltersVM, value?: string) => void;
+  onReset: () => void;
 }
 
 const SORT_LABELS: Record<SortOption, string> = {
   popularity: "Popularity",
   release_date_desc: "Release date",
   title_asc: "Title A–Z",
-}
+};
 
-const AppliedFiltersBar = ({
-  filters,
-  onRemove,
-  onReset,
-}: AppliedFiltersBarProps) => {
+const AppliedFiltersBar = ({ filters, onRemove, onReset }: AppliedFiltersBarProps) => {
   const hasFilters = useMemo(
     () =>
       Boolean(
@@ -26,48 +22,33 @@ const AppliedFiltersBar = ({
           filters.genres.length ||
           filters.releasedAfter ||
           filters.releasedBefore ||
-          filters.sort !== "popularity",
+          filters.sort !== "popularity"
       ),
-    [filters],
-  )
+    [filters]
+  );
 
   if (!hasFilters) {
-    return null
+    return null;
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-foreground/90">
-      {filters.search ? (
-        <FilterChip label={`Search: “${filters.search}”`} onRemove={() => onRemove("search")} />
-      ) : null}
+      {filters.search ? <FilterChip label={`Search: “${filters.search}”`} onRemove={() => onRemove("search")} /> : null}
 
       {filters.genres.map((genre) => (
-        <FilterChip
-          key={genre}
-          label={genre}
-          onRemove={() => onRemove("genres", genre)}
-        />
+        <FilterChip key={genre} label={genre} onRemove={() => onRemove("genres", genre)} />
       ))}
 
       {filters.releasedAfter ? (
-        <FilterChip
-          label={`After ${filters.releasedAfter}`}
-          onRemove={() => onRemove("releasedAfter")}
-        />
+        <FilterChip label={`After ${filters.releasedAfter}`} onRemove={() => onRemove("releasedAfter")} />
       ) : null}
 
       {filters.releasedBefore ? (
-        <FilterChip
-          label={`Before ${filters.releasedBefore}`}
-          onRemove={() => onRemove("releasedBefore")}
-        />
+        <FilterChip label={`Before ${filters.releasedBefore}`} onRemove={() => onRemove("releasedBefore")} />
       ) : null}
 
       {filters.sort !== "popularity" ? (
-        <FilterChip
-          label={`Sort: ${SORT_LABELS[filters.sort]}`}
-          onRemove={() => onRemove("sort")}
-        />
+        <FilterChip label={`Sort: ${SORT_LABELS[filters.sort]}`} onRemove={() => onRemove("sort")} />
       ) : null}
 
       <button
@@ -78,12 +59,12 @@ const AppliedFiltersBar = ({
         Reset all
       </button>
     </div>
-  )
-}
+  );
+};
 
-type FilterChipProps = {
-  label: string
-  onRemove: () => void
+interface FilterChipProps {
+  label: string;
+  onRemove: () => void;
 }
 
 const FilterChip = ({ label, onRemove }: FilterChipProps) => (
@@ -98,7 +79,6 @@ const FilterChip = ({ label, onRemove }: FilterChipProps) => (
       ×
     </button>
   </span>
-)
+);
 
-export default AppliedFiltersBar
-
+export default AppliedFiltersBar;

@@ -1,15 +1,15 @@
-import ResultItem from "./ResultItem"
-import type { AddStatus, CapState, GameCardVM } from "./types"
+import ResultItem from "./ResultItem";
+import type { AddStatus, CapState, GameCardVM } from "./types";
 
-type ResultsListProps = {
-  items: GameCardVM[]
-  isLoading: boolean
-  error: string | null
-  addStatusById: Record<number, AddStatus>
-  capState: CapState
-  onRetry: () => void
-  onAddBacklog: (steamAppId: number) => void
-  onAddInProgress: (steamAppId: number) => void
+interface ResultsListProps {
+  items: GameCardVM[];
+  isLoading: boolean;
+  error: string | null;
+  addStatusById: Record<number, AddStatus>;
+  capState: CapState;
+  onRetry: () => void;
+  onAddBacklog: (steamAppId: number) => void;
+  onAddInProgress: (steamAppId: number) => void;
 }
 
 const ResultsList = ({
@@ -26,13 +26,10 @@ const ResultsList = ({
     return (
       <div className="grid gap-3" aria-busy="true">
         {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-24 rounded-lg border border-border bg-muted/40 animate-pulse"
-          />
+          <div key={index} className="h-24 rounded-lg border border-border bg-muted/40 animate-pulse" />
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -49,7 +46,7 @@ const ResultsList = ({
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!items.length) {
@@ -57,7 +54,7 @@ const ResultsList = ({
       <div className="rounded-lg border border-border bg-muted/30 p-6 text-sm text-foreground/70">
         No games found. Try adjusting your search or filters.
       </div>
-    )
+    );
   }
 
   return (
@@ -73,8 +70,7 @@ const ResultsList = ({
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default ResultsList
-
+export default ResultsList;

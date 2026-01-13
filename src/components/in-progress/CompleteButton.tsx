@@ -1,56 +1,56 @@
-import { useState } from "react"
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-export type CompleteUserGameViewPayload = {
-  achievementsUnlocked?: number
+export interface CompleteUserGameViewPayload {
+  achievementsUnlocked?: number;
 }
 
-type CompleteButtonProps = {
-  onConfirm: (payload: CompleteUserGameViewPayload) => void
-  achievementsTotal?: number | null
-  isLoading?: boolean
+interface CompleteButtonProps {
+  onConfirm: (payload: CompleteUserGameViewPayload) => void;
+  achievementsTotal?: number | null;
+  isLoading?: boolean;
 }
 
 const CompleteButton = ({ onConfirm, achievementsTotal, isLoading }: CompleteButtonProps) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [value, setValue] = useState<string>("")
-  const [error, setError] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [value, setValue] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
-    setValue("")
-    setError(null)
-  }
+    setValue("");
+    setError(null);
+  };
 
   const validate = (raw: string): number | null => {
     if (!raw.trim()) {
-      return null
+      return null;
     }
 
-    const parsed = Number(raw)
+    const parsed = Number(raw);
     if (!Number.isInteger(parsed) || parsed < 0) {
-      setError("Enter a non-negative integer.")
-      return null
+      setError("Enter a non-negative integer.");
+      return null;
     }
 
     if (typeof achievementsTotal === "number" && parsed > achievementsTotal) {
-      setError("Unlocked cannot exceed total achievements.")
-      return null
+      setError("Unlocked cannot exceed total achievements.");
+      return null;
     }
 
-    return parsed
-  }
+    return parsed;
+  };
 
   const handleSubmit = () => {
-    const parsed = validate(value)
+    const parsed = validate(value);
     if (value.trim() && parsed === null) {
-      return
+      return;
     }
 
-    onConfirm(parsed === null ? {} : { achievementsUnlocked: parsed })
-    setIsOpen(false)
-    reset()
-  }
+    onConfirm(parsed === null ? {} : { achievementsUnlocked: parsed });
+    setIsOpen(false);
+    reset();
+  };
 
   return (
     <div className="relative">
@@ -74,8 +74,8 @@ const CompleteButton = ({ onConfirm, achievementsTotal, isLoading }: CompleteBut
                 max={achievementsTotal ?? undefined}
                 value={value}
                 onChange={(event) => {
-                  setValue(event.target.value)
-                  setError(null)
+                  setValue(event.target.value);
+                  setError(null);
                 }}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-invalid={Boolean(error)}
@@ -90,8 +90,8 @@ const CompleteButton = ({ onConfirm, achievementsTotal, isLoading }: CompleteBut
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setIsOpen(false)
-                  reset()
+                  setIsOpen(false);
+                  reset();
                 }}
               >
                 Cancel
@@ -104,8 +104,7 @@ const CompleteButton = ({ onConfirm, achievementsTotal, isLoading }: CompleteBut
         </div>
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-export default CompleteButton
-
+export default CompleteButton;

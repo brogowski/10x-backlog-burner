@@ -1,11 +1,11 @@
-import BacklogListItem from "@/components/backlog/BacklogListItem"
-import type { BacklogGameItemVM } from "@/lib/backlog/types"
+import BacklogListItem from "@/components/backlog/BacklogListItem";
+import type { BacklogGameItemVM } from "@/lib/backlog/types";
 
-type BacklogListProps = {
-  items: BacklogGameItemVM[]
-  onAddToInProgress: (item: BacklogGameItemVM) => void
-  onRemove: (item: BacklogGameItemVM) => void
-  activeItemMutations: Record<number, "addToInProgress" | "remove" | "idle">
+interface BacklogListProps {
+  items: BacklogGameItemVM[];
+  onAddToInProgress: (item: BacklogGameItemVM) => void;
+  onRemove: (item: BacklogGameItemVM) => void;
+  activeItemMutations: Record<number, "addToInProgress" | "remove" | "idle">;
 }
 
 const BacklogList = ({ items, onAddToInProgress, onRemove, activeItemMutations }: BacklogListProps) => {
@@ -21,8 +21,7 @@ const BacklogList = ({ items, onAddToInProgress, onRemove, activeItemMutations }
         />
       ))}
     </ul>
-  )
-}
+  );
+};
 
-export default BacklogList
-
+export default BacklogList;

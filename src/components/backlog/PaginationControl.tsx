@@ -1,26 +1,20 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-type PaginationControlProps = {
-  hasMore: boolean
-  isLoadingMore: boolean
-  loadedCount: number
-  total: number
-  onLoadMore: () => void
+interface PaginationControlProps {
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  loadedCount: number;
+  total: number;
+  onLoadMore: () => void;
 }
 
-const PaginationControl = ({
-  hasMore,
-  isLoadingMore,
-  loadedCount,
-  total,
-  onLoadMore,
-}: PaginationControlProps) => {
+const PaginationControl = ({ hasMore, isLoadingMore, loadedCount, total, onLoadMore }: PaginationControlProps) => {
   if (!hasMore) {
     return (
       <div className="mt-2 text-sm text-muted-foreground">
         Showing {loadedCount} of {total} games.
       </div>
-    )
+    );
   }
 
   return (
@@ -37,8 +31,7 @@ const PaginationControl = ({
         {isLoadingMore ? "Loading..." : "Load more"}
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export default PaginationControl
-
+export default PaginationControl;

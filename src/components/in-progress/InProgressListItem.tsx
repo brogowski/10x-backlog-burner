@@ -1,26 +1,26 @@
-import { CSS } from "@dnd-kit/utilities"
+import { CSS } from "@dnd-kit/utilities";
 
-import CompleteButton from "@/components/in-progress/CompleteButton"
-import GameRow from "@/components/in-progress/GameRow"
-import RemoveToBacklogButton from "@/components/in-progress/RemoveToBacklogButton"
-import type { InProgressGameItemVM } from "@/lib/in-progress/types"
-import { Button } from "@/components/ui/button"
+import CompleteButton from "@/components/in-progress/CompleteButton";
+import GameRow from "@/components/in-progress/GameRow";
+import RemoveToBacklogButton from "@/components/in-progress/RemoveToBacklogButton";
+import type { InProgressGameItemVM } from "@/lib/in-progress/types";
+import { Button } from "@/components/ui/button";
 
-type InProgressListItemProps = {
-  item: InProgressGameItemVM
-  isMutating: boolean
-  isReordering: boolean
-  onMoveUp: () => void
-  onMoveDown: () => void
-  onComplete: (payload: { achievementsUnlocked?: number }) => void
-  onRemove: () => void
-  isFirst: boolean
-  isLast: boolean
-  setNodeRef: (node: HTMLElement | null) => void
-  attributes: Record<string, unknown>
-  listeners: Record<string, unknown>
-  transform: any
-  transition: string | undefined
+interface InProgressListItemProps {
+  item: InProgressGameItemVM;
+  isMutating: boolean;
+  isReordering: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onComplete: (payload: { achievementsUnlocked?: number }) => void;
+  onRemove: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+  setNodeRef: (node: HTMLElement | null) => void;
+  attributes: Record<string, unknown>;
+  listeners: Record<string, unknown>;
+  transform: any;
+  transition: string | undefined;
 }
 
 const InProgressListItem = ({
@@ -93,7 +93,6 @@ const InProgressListItem = ({
       <RemoveToBacklogButton onRemove={onRemove} isLoading={isMutating} />
     </div>
   </li>
-)
+);
 
-export default InProgressListItem
-
+export default InProgressListItem;

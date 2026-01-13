@@ -1,22 +1,16 @@
-import { z } from "zod"
+import { z } from "zod";
 
-const SORT_OPTIONS = ["popularity", "release_date_desc", "title_asc"] as const
+const SORT_OPTIONS = ["popularity", "release_date_desc", "title_asc"] as const;
 
 const searchField = z
   .union([z.string(), z.undefined()])
   .transform((value) => sanitizeSearch(value))
-  .refine(
-    (value) => !value || value.length <= 256,
-    "search must be 256 characters or fewer",
-  )
+  .refine((value) => !value || value.length <= 256, "search must be 256 characters or fewer");
 
 const isoDateField = z
   .union([z.string(), z.undefined()])
   .transform((value) => sanitizeDate(value))
-  .refine(
-    (value) => !value || !Number.isNaN(Date.parse(value)),
-    "date filters must be valid ISO 8601 strings",
-  )
+  .refine((value) => !value || !Number.isNaN(Date.parse(value)), "date filters must be valid ISO 8601 strings");
 
 const gamesSearchSchema = z
   .object({
@@ -30,24 +24,22 @@ const gamesSearchSchema = z
   })
   .superRefine((value, ctx) => {
     if (value.releasedAfter && value.releasedBefore) {
-      const after = Date.parse(value.releasedAfter)
-      const before = Date.parse(value.releasedBefore)
+      const after = Date.parse(value.releasedAfter);
+      const before = Date.parse(value.releasedBefore);
       if (after > before) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["releasedAfter"],
           message: "releasedAfter must be earlier than releasedBefore",
-        })
+        });
       }
     }
-  })
+  });
 
-export type GamesSearchQuery = z.infer<typeof gamesSearchSchema>
-export type GamesSearchSort = (typeof SORT_OPTIONS)[number]
+export type GamesSearchQuery = z.infer<typeof gamesSearchSchema>;
+export type GamesSearchSort = (typeof SORT_OPTIONS)[number];
 
-export const parseGamesSearchParams = (
-  params: URLSearchParams,
-): GamesSearchQuery => {
+export const parseGamesSearchParams = (params: URLSearchParams): GamesSearchQuery => {
   const raw = {
     page: params.get("page") ?? undefined,
     pageSize: params.get("pageSize") ?? undefined,
@@ -56,46 +48,42 @@ export const parseGamesSearchParams = (
     releasedAfter: params.get("releasedAfter") ?? undefined,
     releasedBefore: params.get("releasedBefore") ?? undefined,
     sort: params.get("sort") ?? undefined,
-  }
+  };
 
-  return gamesSearchSchema.parse(raw)
-}
+  return gamesSearchSchema.parse(raw);
+};
 
 const collectGenres = (params: URLSearchParams): string[] => {
-  const rawValues = [
-    ...params.getAll("genres[]"),
-    ...params.getAll("genres"),
-  ]
+  const rawValues = [...params.getAll("genres[]"), ...params.getAll("genres")];
 
-  const unique: string[] = []
+  const unique: string[] = [];
   for (const value of rawValues) {
-    const trimmed = value.trim()
+    const trimmed = value.trim();
     if (!trimmed) {
-      continue
+      continue;
     }
     if (!unique.includes(trimmed)) {
-      unique.push(trimmed)
+      unique.push(trimmed);
     }
   }
 
-  return unique
-}
+  return unique;
+};
 
 const sanitizeSearch = (value?: string): string | undefined => {
   if (typeof value !== "string") {
-    return undefined
+    return undefined;
   }
 
-  const normalized = value.trim().replace(/\s+/g, " ")
-  return normalized.length ? normalized : undefined
-}
+  const normalized = value.trim().replace(/\s+/g, " ");
+  return normalized.length ? normalized : undefined;
+};
 
 const sanitizeDate = (value?: string): string | undefined => {
   if (typeof value !== "string") {
-    return undefined
+    return undefined;
   }
 
-  const trimmed = value.trim()
-  return trimmed.length ? trimmed : undefined
-}
-
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+};

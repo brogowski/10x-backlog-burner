@@ -6,26 +6,26 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from "@dnd-kit/core"
+} from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-} from "@dnd-kit/sortable"
-import { useState } from "react"
+} from "@dnd-kit/sortable";
+import { useState } from "react";
 
-import InProgressListItem from "@/components/in-progress/InProgressListItem"
-import type { InProgressGameItemVM } from "@/lib/in-progress/types"
+import InProgressListItem from "@/components/in-progress/InProgressListItem";
+import type { InProgressGameItemVM } from "@/lib/in-progress/types";
 
-type InProgressListProps = {
-  items: InProgressGameItemVM[]
-  isReordering: boolean
-  onReorder: (items: InProgressGameItemVM[]) => void
-  onComplete: (item: InProgressGameItemVM, payload: { achievementsUnlocked?: number }) => void
-  onRemove: (item: InProgressGameItemVM) => void
-  activeItemMutations: Record<number, "complete" | "remove" | "idle">
+interface InProgressListProps {
+  items: InProgressGameItemVM[];
+  isReordering: boolean;
+  onReorder: (items: InProgressGameItemVM[]) => void;
+  onComplete: (item: InProgressGameItemVM, payload: { achievementsUnlocked?: number }) => void;
+  onRemove: (item: InProgressGameItemVM) => void;
+  activeItemMutations: Record<number, "complete" | "remove" | "idle">;
 }
 
 const InProgressList = ({
@@ -36,58 +36,55 @@ const InProgressList = ({
   onRemove,
   activeItemMutations,
 }: InProgressListProps) => {
-  const [announcement, setAnnouncement] = useState<string>("")
+  const [announcement, setAnnouncement] = useState<string>("");
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const moveItem = (index: number, direction: -1 | 1) => {
-    const nextIndex = index + direction
+    const nextIndex = index + direction;
     if (nextIndex < 0 || nextIndex >= items.length) {
-      return
+      return;
     }
 
-    const nextItems = [...items]
-    const [moved] = nextItems.splice(index, 1)
-    nextItems.splice(nextIndex, 0, moved)
+    const nextItems = [...items];
+    const [moved] = nextItems.splice(index, 1);
+    nextItems.splice(nextIndex, 0, moved);
 
     const normalized = nextItems.map((item, idx) => ({
       ...item,
       position: idx + 1,
-    }))
+    }));
 
-    onReorder(normalized)
-  }
+    onReorder(normalized);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+    const { active, over } = event;
     if (!over || active.id === over.id) {
-      return
+      return;
     }
 
-    const oldIndex = items.findIndex((item) => item.steamAppId === Number(active.id))
-    const newIndex = items.findIndex((item) => item.steamAppId === Number(over.id))
+    const oldIndex = items.findIndex((item) => item.steamAppId === Number(active.id));
+    const newIndex = items.findIndex((item) => item.steamAppId === Number(over.id));
 
     if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {
-      return
+      return;
     }
 
     const moved = arrayMove(items, oldIndex, newIndex).map((item, idx) => ({
       ...item,
       position: idx + 1,
-    }))
+    }));
 
-    onReorder(moved)
-    setAnnouncement(`${items[oldIndex]?.title ?? "Game"} moved to position ${newIndex + 1}.`)
-  }
+    onReorder(moved);
+    setAnnouncement(`${items[oldIndex]?.title ?? "Game"} moved to position ${newIndex + 1}.`);
+  };
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={items.map((item) => item.steamAppId)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={items.map((item) => item.steamAppId)} strategy={verticalListSortingStrategy}>
         <div aria-live="polite" className="sr-only">
           {announcement}
         </div>
@@ -97,7 +94,7 @@ const InProgressList = ({
               key={item.steamAppId}
               item={item}
               index={index}
-            isMutating={(activeItemMutations[item.steamAppId] ?? "idle") !== "idle"}
+              isMutating={(activeItemMutations[item.steamAppId] ?? "idle") !== "idle"}
               isReordering={isReordering}
               onMoveUp={() => moveItem(index, -1)}
               onMoveDown={() => moveItem(index, 1)}
@@ -110,20 +107,20 @@ const InProgressList = ({
         </ol>
       </SortableContext>
     </DndContext>
-  )
-}
+  );
+};
 
-type SortableListItemProps = {
-  item: InProgressGameItemVM
-  index: number
-  isMutating: boolean
-  isReordering: boolean
-  onMoveUp: () => void
-  onMoveDown: () => void
-  onComplete: (payload: { achievementsUnlocked?: number }) => void
-  onRemove: () => void
-  isFirst: boolean
-  isLast: boolean
+interface SortableListItemProps {
+  item: InProgressGameItemVM;
+  index: number;
+  isMutating: boolean;
+  isReordering: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onComplete: (payload: { achievementsUnlocked?: number }) => void;
+  onRemove: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 const SortableListItem = ({
@@ -138,7 +135,7 @@ const SortableListItem = ({
   isFirst,
   isLast,
 }: SortableListItemProps) => {
-  const sortable = useSortable({ id: item.steamAppId })
+  const sortable = useSortable({ id: item.steamAppId });
 
   return (
     <InProgressListItem
@@ -157,8 +154,7 @@ const SortableListItem = ({
       transform={sortable.transform}
       transition={sortable.transition}
     />
-  )
-}
+  );
+};
 
-export default InProgressList
-
+export default InProgressList;

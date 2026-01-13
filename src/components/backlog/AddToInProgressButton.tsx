@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-type AddToInProgressButtonProps = {
-  onClick: () => void
-  isLoading?: boolean
-  isQueueAtCap?: boolean
-  title?: string
+interface AddToInProgressButtonProps {
+  onClick: () => void;
+  isLoading?: boolean;
+  isQueueAtCap?: boolean;
+  title?: string;
 }
 
 const AddToInProgressButton = ({ onClick, isLoading, isQueueAtCap, title }: AddToInProgressButtonProps) => (
@@ -15,7 +15,6 @@ const AddToInProgressButton = ({ onClick, isLoading, isQueueAtCap, title }: AddT
   >
     {isLoading ? "Adding..." : "Add to In-Progress"}
   </Button>
-)
+);
 
-export default AddToInProgressButton
-
+export default AddToInProgressButton;

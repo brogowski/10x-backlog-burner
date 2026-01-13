@@ -1,15 +1,15 @@
-import type { SortOption } from "./types"
+import type { SortOption } from "./types";
 
-type SortSelectProps = {
-  value: SortOption
-  onChange: (next: SortOption) => void
+interface SortSelectProps {
+  value: SortOption;
+  onChange: (next: SortOption) => void;
 }
 
 const SORT_LABELS: Record<SortOption, string> = {
   popularity: "Popularity",
   release_date_desc: "Release date (newest)",
   title_asc: "Title (A–Z)",
-}
+};
 
 const SortSelect = ({ value, onChange }: SortSelectProps) => {
   return (
@@ -27,8 +27,7 @@ const SortSelect = ({ value, onChange }: SortSelectProps) => {
         ))}
       </select>
     </label>
-  )
-}
+  );
+};
 
-export default SortSelect
-
+export default SortSelect;

@@ -1,40 +1,40 @@
 ---
-import AuthPageView from "../components/auth/AuthPageView"
-import AuthLayout from "../layouts/AuthLayout.astro"
+import AuthPageView from "../components/auth/AuthPageView";
+import AuthLayout from "../layouts/AuthLayout.astro";
 
-export const prerender = false
+export const prerender = false;
 
-type MaybeUser = { id: string; email?: string | null } | undefined
+type MaybeUser = { id: string; email?: string | null } | undefined;
 
-const DISALLOWED_REDIRECTS = ["/auth", "/auth/", "/auth/reset-confirm", "/reset-password"]
+const DISALLOWED_REDIRECTS = ["/auth", "/auth/", "/auth/reset-confirm", "/reset-password"];
 
 const sanitizeRedirect = (value: string | null): string | null => {
-  if (!value) return null
+  if (!value) return null;
   try {
-    const target = new URL(value, Astro.url)
-    const isSameOrigin = target.origin === Astro.url.origin
-    const isRelativePath = value.startsWith("/") || (!value.startsWith("http") && target.pathname.startsWith("/"))
-    const isDisallowed = DISALLOWED_REDIRECTS.some((path) => target.pathname === path)
+    const target = new URL(value, Astro.url);
+    const isSameOrigin = target.origin === Astro.url.origin;
+    const isRelativePath = value.startsWith("/") || (!value.startsWith("http") && target.pathname.startsWith("/"));
+    const isDisallowed = DISALLOWED_REDIRECTS.some((path) => target.pathname === path);
 
     if (!isSameOrigin || !isRelativePath || isDisallowed) {
-      return null
+      return null;
     }
 
-    return `${target.pathname}${target.search}${target.hash}`
+    return `${target.pathname}${target.search}${target.hash}`;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
-const initialModeParam = Astro.url.searchParams.get("mode")
-const initialMode = initialModeParam === "signup" ? "signup" : "login"
+const initialModeParam = Astro.url.searchParams.get("mode");
+const initialMode = initialModeParam === "signup" ? "signup" : "login";
 
-const redirectParam = Astro.url.searchParams.get("redirect")
-const safeRedirect = sanitizeRedirect(redirectParam)
+const redirectParam = Astro.url.searchParams.get("redirect");
+const safeRedirect = sanitizeRedirect(redirectParam);
 
-const user = Astro.locals.user as MaybeUser
+const user = Astro.locals.user as MaybeUser;
 if (user) {
-  return Astro.redirect(safeRedirect ?? "/in-progress")
+  return Astro.redirect(safeRedirect ?? "/in-progress");
 }
 ---
 

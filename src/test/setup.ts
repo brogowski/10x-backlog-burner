@@ -1,2 +1,1 @@
-import "@testing-library/dom"
-
+import "@testing-library/dom";

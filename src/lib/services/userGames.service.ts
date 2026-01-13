@@ -1,7 +1,7 @@
-import type { PostgrestError } from "@supabase/supabase-js"
+import type { PostgrestError } from "@supabase/supabase-js";
 
-import type { SupabaseClient } from "../../db/supabase.client.ts"
-import type { Tables } from "../../db/database.types.ts"
+import type { SupabaseClient } from "../../db/supabase.client.ts";
+import type { Tables } from "../../db/database.types.ts";
 import type {
   GamePlayStatus,
   CompleteUserGameCommand,
@@ -9,125 +9,125 @@ import type {
   UpdateUserGameCommand,
   UserGameDTO,
   UserGamesListDTO,
-} from "../../types.ts"
+} from "../../types.ts";
 
-export type UserGamesFilters = {
-  page: number
-  pageSize: number
-  statuses: ReadonlyArray<GamePlayStatus>
-  search?: string
-  orderBy: "in_progress_position" | "updated_at" | "popularity_score"
-  orderDirection: "asc" | "desc"
+export interface UserGamesFilters {
+  page: number;
+  pageSize: number;
+  statuses: readonly GamePlayStatus[];
+  search?: string;
+  orderBy: "in_progress_position" | "updated_at" | "popularity_score";
+  orderDirection: "asc" | "desc";
 }
 
-const IN_PROGRESS_CAP = 5
+const IN_PROGRESS_CAP = 5;
 
 type UserGameSelection = Tables<"user_games"> & {
-  games: Tables<"games"> | null
+  games: Tables<"games"> | null;
+};
+
+interface UserGameInsertPayload {
+  userId: string;
+  gameId: number;
+  status: GamePlayStatus;
+  inProgressPosition: number | null;
 }
 
-type UserGameInsertPayload = {
-  userId: string
-  gameId: number
-  status: GamePlayStatus
-  inProgressPosition: number | null
-}
-
-type ReorderItem = {
-  steamAppId: number
-  position: number
+interface ReorderItem {
+  steamAppId: number;
+  position: number;
 }
 
 const ORDER_NULLS_LAST: Record<UserGamesFilters["orderBy"], boolean> = {
   in_progress_position: false,
   updated_at: false,
   popularity_score: false,
-}
+};
 
 export const listUserGames = async (
   userId: string,
   filters: UserGamesFilters,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGamesListDTO> => {
-  const offset = (filters.page - 1) * filters.pageSize
-  const limit = offset + filters.pageSize - 1
+  const offset = (filters.page - 1) * filters.pageSize;
+  const limit = offset + filters.pageSize - 1;
 
   let query = supabase
     .from("user_games")
     .select(
       "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
-      { count: "exact", head: false },
+      { count: "exact", head: false }
     )
-    .eq("user_id", userId)
+    .eq("user_id", userId);
 
   if (filters.statuses.length) {
-    query = query.in("status", filters.statuses)
+    query = query.in("status", filters.statuses);
   }
 
   if (filters.search) {
     query = query.textSearch("search_tsv", filters.search, {
       type: "websearch",
       foreignTable: "games",
-    })
+    });
   }
 
-  const isGameOrder = filters.orderBy === "popularity_score"
+  const isGameOrder = filters.orderBy === "popularity_score";
   query = query.order(filters.orderBy, {
     ascending: filters.orderDirection === "asc",
     nullsFirst: ORDER_NULLS_LAST[filters.orderBy] === false ? false : undefined,
     foreignTable: isGameOrder ? "games" : undefined,
-  })
+  });
 
-  const { data, error, count } = await query.range(offset, limit)
+  const { data, error, count } = await query.range(offset, limit);
 
   if (error) {
-    throw createUserGamesServiceError(error)
+    throw createUserGamesServiceError(error);
   }
 
-  const results = (data ?? []).map(mapRowToDto)
+  const results = (data ?? []).map(mapRowToDto);
 
   return {
     page: filters.page,
     pageSize: filters.pageSize,
     total: typeof count === "number" ? count : results.length,
     results,
-  }
-}
+  };
+};
 
 export const createUserGame = async (
   payload: UserGameInsertPayload,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameDTO> => {
-  validateInProgressPosition(payload.status, payload.inProgressPosition)
+  validateInProgressPosition(payload.status, payload.inProgressPosition);
 
-  const existing = await findExistingUserGame(payload.userId, payload.gameId, supabase)
+  const existing = await findExistingUserGame(payload.userId, payload.gameId, supabase);
 
   if (existing) {
     if (existing.status === "removed") {
-      return reviveRemovedUserGame(payload, supabase)
+      return reviveRemovedUserGame(payload, supabase);
     }
 
     throw new UserGamesServiceError("DuplicateEntry", "User game already exists.", {
       details: { status: existing.status },
-    })
+    });
   }
 
   const { data: game, error: gameError } = await supabase
     .from("games")
     .select("steam_app_id, title, slug, popularity_score")
     .eq("steam_app_id", payload.gameId)
-    .single()
+    .single();
 
   if (gameError) {
-    throw createUserGamesServiceError(gameError, "BacklogCreateFailed")
+    throw createUserGamesServiceError(gameError, "BacklogCreateFailed");
   }
 
   if (!game) {
-    throw new UserGamesServiceError("NotFound", "Game not found.")
+    throw new UserGamesServiceError("NotFound", "Game not found.");
   }
 
   if (payload.status === "in_progress") {
-    await ensureInProgressCapacity(payload.userId, supabase)
+    await ensureInProgressCapacity(payload.userId, supabase);
   }
 
   const { data, error } = await supabase
@@ -139,9 +139,9 @@ export const createUserGame = async (
       in_progress_position: payload.inProgressPosition,
     })
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)"
     )
-    .single()
+    .single();
 
   if (error) {
     if (isUniqueViolation(error)) {
@@ -151,68 +151,62 @@ export const createUserGame = async (
           message: error.message,
           hint: error.hint,
         },
-      })
+      });
     }
 
-    throw createUserGamesServiceError(error, "BacklogCreateFailed")
+    throw createUserGamesServiceError(error, "BacklogCreateFailed");
   }
 
-  return mapRowToDto(assertSelection(data))
-}
+  return mapRowToDto(assertSelection(data));
+};
 
 export const reorderInProgress = async (
   userId: string,
-  items: ReadonlyArray<ReorderItem>,
-  supabase: SupabaseClient,
+  items: readonly ReorderItem[],
+  supabase: SupabaseClient
 ): Promise<ReorderInProgressResultDTO> => {
   const { data: existing, error: fetchError } = await supabase
     .from("user_games")
     .select("game_id, in_progress_position")
     .eq("user_id", userId)
-    .eq("status", "in_progress")
+    .eq("status", "in_progress");
 
   if (fetchError) {
-    throw createUserGamesServiceError(fetchError, "BacklogReorderFailed")
+    throw createUserGamesServiceError(fetchError, "BacklogReorderFailed");
   }
 
-  const existingIds = new Set((existing ?? []).map((row) => row.game_id))
-  const incomingIds = new Set(items.map((item) => item.steamAppId))
+  const existingIds = new Set((existing ?? []).map((row) => row.game_id));
+  const incomingIds = new Set(items.map((item) => item.steamAppId));
 
-  const countsMatch = existingIds.size === incomingIds.size
+  const countsMatch = existingIds.size === incomingIds.size;
   const coversAll =
     countsMatch &&
     Array.from(existingIds).every((id) => incomingIds.has(id)) &&
-    Array.from(incomingIds).every((id) => existingIds.has(id))
+    Array.from(incomingIds).every((id) => existingIds.has(id));
 
   if (!coversAll) {
-    throw new UserGamesServiceError(
-      "QueueMismatch",
-      "Submitted items do not match current in-progress queue.",
-      { details: { expected: Array.from(existingIds), received: Array.from(incomingIds) } },
-    )
+    throw new UserGamesServiceError("QueueMismatch", "Submitted items do not match current in-progress queue.", {
+      details: { expected: Array.from(existingIds), received: Array.from(incomingIds) },
+    });
   }
 
-  let updated = 0
+  let updated = 0;
   for (const item of items) {
     const { error } = await supabase
       .from("user_games")
       .update({ in_progress_position: -item.position })
       .eq("user_id", userId)
       .eq("game_id", item.steamAppId)
-      .eq("status", "in_progress")
+      .eq("status", "in_progress");
 
     if (error) {
       if (isUniqueViolation(error)) {
-        throw new UserGamesServiceError(
-          "DuplicatePositions",
-          "Conflicting in-progress positions.",
-          { details: error },
-        )
+        throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", { details: error });
       }
 
-      throw createUserGamesServiceError(error, "BacklogReorderFailed")
+      throw createUserGamesServiceError(error, "BacklogReorderFailed");
     }
-    updated += 1
+    updated += 1;
   }
 
   for (const item of items) {
@@ -221,50 +215,45 @@ export const reorderInProgress = async (
       .update({ in_progress_position: item.position })
       .eq("user_id", userId)
       .eq("game_id", item.steamAppId)
-      .eq("status", "in_progress")
+      .eq("status", "in_progress");
 
     if (error) {
       if (isUniqueViolation(error)) {
-        throw new UserGamesServiceError(
-          "DuplicatePositions",
-          "Conflicting in-progress positions.",
-          { details: error },
-        )
+        throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", { details: error });
       }
 
-      throw createUserGamesServiceError(error, "BacklogReorderFailed")
+      throw createUserGamesServiceError(error, "BacklogReorderFailed");
     }
   }
 
-  return { updated }
-}
+  return { updated };
+};
 
 export const updateUserGame = async (
   userId: string,
   steamAppId: number,
   command: UpdateUserGameCommand,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameDTO> => {
-  const existing = await fetchUserGame(userId, steamAppId, supabase)
-  const targetStatus = command.status ?? existing.status
-  const leavingInProgress = existing.status === "in_progress" && targetStatus !== "in_progress"
+  const existing = await fetchUserGame(userId, steamAppId, supabase);
+  const targetStatus = command.status ?? existing.status;
+  const leavingInProgress = existing.status === "in_progress" && targetStatus !== "in_progress";
 
   if (!isValidTransition(existing.status, targetStatus)) {
     throw new UserGamesServiceError(
       "InvalidStatusTransition",
-      `Status ${existing.status} cannot transition to ${targetStatus}.`,
-    )
+      `Status ${existing.status} cannot transition to ${targetStatus}.`
+    );
   }
 
-  const enteringInProgress =
-    existing.status !== "in_progress" && targetStatus === "in_progress"
+  const enteringInProgress = existing.status !== "in_progress" && targetStatus === "in_progress";
 
   if (enteringInProgress) {
-    await ensureInProgressCapacity(userId, supabase)
+    await ensureInProgressCapacity(userId, supabase);
   }
 
-  const nextPosition = deriveInProgressPosition(existing, command, targetStatus)
-  const nextAchievements = deriveAchievements(existing, command)
+  const nextPosition = deriveInProgressPosition(existing, command, targetStatus);
+  const nextAchievements = deriveAchievements(existing, command);
 
   const { data, error } = await supabase
     .from("user_games")
@@ -277,53 +266,46 @@ export const updateUserGame = async (
     .eq("user_id", userId)
     .eq("game_id", steamAppId)
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)"
     )
-    .single()
+    .single();
 
   if (error) {
     if (isUniqueViolation(error)) {
-      throw new UserGamesServiceError(
-        "DuplicatePositions",
-        "Conflicting in-progress positions.",
-        { details: error },
-      )
+      throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", { details: error });
     }
 
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
   if (!data) {
-    throw new UserGamesServiceError("EntryNotFound", "User game not found.")
+    throw new UserGamesServiceError("EntryNotFound", "User game not found.");
   }
 
   if (leavingInProgress) {
-    await compactInProgressPositions(userId, existing.in_progress_position, supabase)
+    await compactInProgressPositions(userId, existing.in_progress_position, supabase);
   }
 
-  return mapRowToDto(assertSelection(data))
-}
+  return mapRowToDto(assertSelection(data));
+};
 
 export const completeUserGame = async (
   userId: string,
   steamAppId: number,
   command: CompleteUserGameCommand,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameDTO> => {
-  const existing = await fetchUserGame(userId, steamAppId, supabase)
+  const existing = await fetchUserGame(userId, steamAppId, supabase);
 
   if (!["backlog", "in_progress"].includes(existing.status)) {
-    throw new UserGamesServiceError(
-      "InvalidStatusTransition",
-      `Cannot complete from status ${existing.status}.`,
-    )
+    throw new UserGamesServiceError("InvalidStatusTransition", `Cannot complete from status ${existing.status}.`);
   }
 
   const nextAchievements = deriveAchievements(existing, {
     achievementsUnlocked: command.achievementsUnlocked,
-  })
+  });
 
-  const completedAt = new Date().toISOString()
+  const completedAt = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("user_games")
@@ -337,35 +319,27 @@ export const completeUserGame = async (
     .eq("user_id", userId)
     .eq("game_id", steamAppId)
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)"
     )
-    .single()
+    .single();
 
   if (error) {
     if (isUniqueViolation(error)) {
-      throw new UserGamesServiceError(
-        "DuplicatePositions",
-        "Conflicting in-progress positions.",
-        { details: error },
-      )
+      throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", { details: error });
     }
 
-    throw createUserGamesServiceError(error, "CompletionFailed")
+    throw createUserGamesServiceError(error, "CompletionFailed");
   }
 
   if (!data) {
-    throw new UserGamesServiceError("EntryNotFound", "User game not found.")
+    throw new UserGamesServiceError("EntryNotFound", "User game not found.");
   }
 
-  return mapRowToDto(assertSelection(data))
-}
+  return mapRowToDto(assertSelection(data));
+};
 
-export const removeUserGame = async (
-  userId: string,
-  steamAppId: number,
-  supabase: SupabaseClient,
-): Promise<void> => {
-  const existing = await fetchUserGame(userId, steamAppId, supabase)
+export const removeUserGame = async (userId: string, steamAppId: number, supabase: SupabaseClient): Promise<void> => {
+  const existing = await fetchUserGame(userId, steamAppId, supabase);
 
   const { error } = await supabase
     .from("user_games")
@@ -375,21 +349,18 @@ export const removeUserGame = async (
       in_progress_position: null,
     })
     .eq("user_id", userId)
-    .eq("game_id", steamAppId)
+    .eq("game_id", steamAppId);
 
   if (error) {
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
-  return
-}
+  return;
+};
 
 const mapRowToDto = (row: UserGameSelection): UserGameDTO => {
   if (!row.games) {
-    throw new UserGamesServiceError(
-      "BacklogFetchFailed",
-      "User game row missing associated game.",
-    )
+    throw new UserGamesServiceError("BacklogFetchFailed", "User game row missing associated game.");
   }
 
   return {
@@ -404,8 +375,8 @@ const mapRowToDto = (row: UserGameSelection): UserGameDTO => {
     removedAt: row.removed_at,
     popularityScore: row.games.popularity_score,
     slug: row.games.slug,
-  }
-}
+  };
+};
 
 export class UserGamesServiceError extends Error {
   constructor(
@@ -426,64 +397,60 @@ export class UserGamesServiceError extends Error {
       | "InvalidPayload"
       | "DeleteNotAllowed",
     message: string,
-    options?: { details?: unknown; cause?: unknown },
+    options?: { details?: unknown; cause?: unknown }
   ) {
-    super(message, { cause: options?.cause })
-    this.details = options?.details
+    super(message, { cause: options?.cause });
+    this.details = options?.details;
   }
 
-  readonly details?: unknown
+  readonly details?: unknown;
 }
 
 const createUserGamesServiceError = (
   error: PostgrestError,
-  code: UserGamesServiceError["code"] = "BacklogFetchFailed",
+  code: UserGamesServiceError["code"] = "BacklogFetchFailed"
 ) =>
-  new UserGamesServiceError(
-    code,
-    "Failed to query user games.",
-    {
-      cause: error,
-      details: {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      },
+  new UserGamesServiceError(code, "Failed to query user games.", {
+    cause: error,
+    details: {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
     },
-  )
+  });
 
-const assertSelection = (row: unknown): UserGameSelection => row as UserGameSelection
+const assertSelection = (row: unknown): UserGameSelection => row as UserGameSelection;
 
-const isUniqueViolation = (error: PostgrestError) => error.code === "23505"
+const isUniqueViolation = (error: PostgrestError) => error.code === "23505";
 
 const findExistingUserGame = async (
   userId: string,
   gameId: number,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameSelection | null> => {
   const { data, error } = await supabase
     .from("user_games")
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)"
     )
     .eq("user_id", userId)
     .eq("game_id", gameId)
-    .maybeSingle()
+    .maybeSingle();
 
   if (error) {
-    throw createUserGamesServiceError(error, "BacklogFetchFailed")
+    throw createUserGamesServiceError(error, "BacklogFetchFailed");
   }
 
-  return data ? assertSelection(data) : null
-}
+  return data ? assertSelection(data) : null;
+};
 
 const reviveRemovedUserGame = async (
   payload: UserGameInsertPayload,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameDTO> => {
   if (payload.status === "in_progress") {
-    await ensureInProgressCapacity(payload.userId, supabase)
+    await ensureInProgressCapacity(payload.userId, supabase);
   }
 
   const { data, error } = await supabase
@@ -497,107 +464,95 @@ const reviveRemovedUserGame = async (
     .eq("user_id", payload.userId)
     .eq("game_id", payload.gameId)
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score)"
     )
-    .single()
+    .single();
 
   if (error) {
     if (isUniqueViolation(error)) {
-      throw new UserGamesServiceError(
-        "DuplicatePositions",
-        "Conflicting in-progress positions.",
-        { details: error },
-      )
+      throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", { details: error });
     }
 
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
-  return mapRowToDto(assertSelection(data))
-}
+  return mapRowToDto(assertSelection(data));
+};
 
-const validateInProgressPosition = (
-  status: GamePlayStatus,
-  position: number | null,
-): void => {
+const validateInProgressPosition = (status: GamePlayStatus, position: number | null): void => {
   if (status === "in_progress") {
     if (position === null || position === undefined) {
       throw new UserGamesServiceError(
         "PositionRequiredForInProgress",
-        "inProgressPosition is required when status is in_progress.",
-      )
+        "inProgressPosition is required when status is in_progress."
+      );
     }
-    return
+    return;
   }
 
   if (position !== null && position !== undefined) {
     throw new UserGamesServiceError(
       "PositionRequiredForInProgress",
-      "inProgressPosition must be null unless status is in_progress.",
-    )
+      "inProgressPosition must be null unless status is in_progress."
+    );
   }
-}
+};
 
 const fetchUserGame = async (
   userId: string,
   steamAppId: number,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<UserGameSelection> => {
   const { data, error } = await supabase
     .from("user_games")
     .select(
-      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)",
+      "game_id, status, in_progress_position, achievements_unlocked, completed_at, imported_at, updated_at, removed_at, games!inner(steam_app_id, title, slug, popularity_score, achievements_total)"
     )
     .eq("user_id", userId)
     .eq("game_id", steamAppId)
-    .single()
+    .single();
 
   if (error) {
     if (error.code === "PGRST116" || error.code === "PGRST302") {
       throw new UserGamesServiceError("EntryNotFound", "User game not found.", {
         details: { code: error.code, message: error.message },
-      })
+      });
     }
 
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
   if (!data) {
-    throw new UserGamesServiceError("EntryNotFound", "User game not found.")
+    throw new UserGamesServiceError("EntryNotFound", "User game not found.");
   }
 
-  return assertSelection(data)
-}
+  return assertSelection(data);
+};
 
-const ensureInProgressCapacity = async (
-  userId: string,
-  supabase: SupabaseClient,
-): Promise<void> => {
+const ensureInProgressCapacity = async (userId: string, supabase: SupabaseClient): Promise<void> => {
   const { count, error } = await supabase
     .from("user_games")
     .select("game_id", { count: "exact", head: true })
     .eq("user_id", userId)
-    .eq("status", "in_progress")
+    .eq("status", "in_progress");
 
   if (error) {
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
   if (typeof count === "number" && count >= IN_PROGRESS_CAP) {
-    throw new UserGamesServiceError(
-      "InProgressCapReached",
-      "In-progress queue is full.",
-      { details: { cap: IN_PROGRESS_CAP } },
-    )
+    throw new UserGamesServiceError("InProgressCapReached", "In-progress queue is full.", {
+      details: { cap: IN_PROGRESS_CAP },
+    });
   }
-}
+};
 
 const compactInProgressPositions = async (
   userId: string,
   vacatedPosition: number | null,
-  supabase: SupabaseClient,
+  supabase: SupabaseClient
 ): Promise<void> => {
-  if (vacatedPosition === null || vacatedPosition === undefined) return
+  if (vacatedPosition === null || vacatedPosition === undefined) return;
 
   const { data, error } = await supabase
     .from("user_games")
@@ -605,15 +560,15 @@ const compactInProgressPositions = async (
     .eq("user_id", userId)
     .eq("status", "in_progress")
     .gt("in_progress_position", vacatedPosition)
-    .order("in_progress_position", { ascending: true })
+    .order("in_progress_position", { ascending: true });
 
   if (error) {
-    throw createUserGamesServiceError(error, "BacklogUpdateFailed")
+    throw createUserGamesServiceError(error, "BacklogUpdateFailed");
   }
 
   for (const row of data ?? []) {
     if (typeof row.in_progress_position !== "number") {
-      continue
+      continue;
     }
 
     const { error: updateError } = await supabase
@@ -621,85 +576,78 @@ const compactInProgressPositions = async (
       .update({ in_progress_position: row.in_progress_position - 1 })
       .eq("user_id", userId)
       .eq("game_id", row.game_id)
-      .eq("status", "in_progress")
+      .eq("status", "in_progress");
 
     if (updateError) {
       if (isUniqueViolation(updateError)) {
-        throw new UserGamesServiceError(
-          "DuplicatePositions",
-          "Conflicting in-progress positions.",
-          { details: updateError },
-        )
+        throw new UserGamesServiceError("DuplicatePositions", "Conflicting in-progress positions.", {
+          details: updateError,
+        });
       }
 
-      throw createUserGamesServiceError(updateError, "BacklogUpdateFailed")
+      throw createUserGamesServiceError(updateError, "BacklogUpdateFailed");
     }
   }
-}
+};
 
 const isValidTransition = (from: GamePlayStatus, to: GamePlayStatus) => {
-  if (from === to) return true
+  if (from === to) return true;
 
   switch (from) {
     case "backlog":
-      return to === "in_progress" || to === "removed"
+      return to === "in_progress" || to === "removed";
     case "in_progress":
-      return to === "completed" || to === "backlog"
+      return to === "completed" || to === "backlog";
     case "completed":
-      return to === "backlog"
+      return to === "backlog";
     case "removed":
-      return false
+      return false;
     default:
-      return false
+      return false;
   }
-}
+};
 
 const deriveInProgressPosition = (
   existing: UserGameSelection,
   command: UpdateUserGameCommand,
-  targetStatus: GamePlayStatus,
+  targetStatus: GamePlayStatus
 ): number | null => {
-  const incoming = command.inProgressPosition
-  const existingPosition = existing.in_progress_position
+  const incoming = command.inProgressPosition;
+  const existingPosition = existing.in_progress_position;
 
   if (targetStatus === "in_progress") {
-    const next = incoming ?? existingPosition
+    const next = incoming ?? existingPosition;
     if (next === null || next === undefined) {
       throw new UserGamesServiceError(
         "PositionRequiredForInProgress",
-        "inProgressPosition is required when status is in_progress.",
-      )
+        "inProgressPosition is required when status is in_progress."
+      );
     }
-    return next
+    return next;
   }
 
-  if (
-    incoming !== undefined &&
-    incoming !== null 
-  ) {
+  if (incoming !== undefined && incoming !== null) {
     throw new UserGamesServiceError(
       "PositionRequiredForInProgress",
-      "inProgressPosition must be null unless status is in_progress.",
-    )
+      "inProgressPosition must be null unless status is in_progress."
+    );
   }
 
-  return null
-}
+  return null;
+};
 
 const deriveAchievements = (
   existing: UserGameSelection,
-  command: Pick<UpdateUserGameCommand, "achievementsUnlocked">,
+  command: Pick<UpdateUserGameCommand, "achievementsUnlocked">
 ): number => {
-  const next = command.achievementsUnlocked ?? existing.achievements_unlocked ?? 0
-  const total = existing.games?.achievements_total
+  const next = command.achievementsUnlocked ?? existing.achievements_unlocked ?? 0;
+  const total = existing.games?.achievements_total;
 
   if (typeof total === "number" && next > total) {
-    throw new UserGamesServiceError(
-      "InvalidPayload",
-      "achievementsUnlocked exceeds total achievements for the game.",
-      { details: { provided: next, total } },
-    )
+    throw new UserGamesServiceError("InvalidPayload", "achievementsUnlocked exceeds total achievements for the game.", {
+      details: { provided: next, total },
+    });
   }
 
-  return next
-}
+  return next;
+};

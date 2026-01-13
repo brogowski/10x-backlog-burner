@@ -1,8 +1,8 @@
-import AddGamesButton from "./AddGamesButton"
+import AddGamesButton from "./AddGamesButton";
 
-type EmptyStateProps = {
-  onAddClick: () => void
-  isAtCap: boolean
+interface EmptyStateProps {
+  onAddClick: () => void;
+  isAtCap: boolean;
 }
 
 const EmptyState = ({ onAddClick, isAtCap }: EmptyStateProps) => (
@@ -12,7 +12,6 @@ const EmptyState = ({ onAddClick, isAtCap }: EmptyStateProps) => (
       <AddGamesButton onClick={onAddClick} disabled={isAtCap} />
     </div>
   </div>
-)
+);
 
-export default EmptyState
-
+export default EmptyState;

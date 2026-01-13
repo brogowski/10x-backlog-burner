@@ -1,9 +1,9 @@
-type FormErrorAlertProps = {
-  message?: string | null
+interface FormErrorAlertProps {
+  message?: string | null;
 }
 
 const FormErrorAlert = ({ message }: FormErrorAlertProps) => {
-  if (!message) return null
+  if (!message) return null;
   return (
     <div
       role="alert"
@@ -12,7 +12,7 @@ const FormErrorAlert = ({ message }: FormErrorAlertProps) => {
     >
       {message}
     </div>
-  )
-}
+  );
+};
 
-export default FormErrorAlert
+export default FormErrorAlert;

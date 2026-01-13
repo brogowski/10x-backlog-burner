@@ -1,31 +1,22 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
-type PaginationControlsProps = {
-  page: number
-  pageSize: number
-  total: number
-  onPageChange: (page: number) => void
-  onPageSizeChange: (pageSize: number) => void
+interface PaginationControlsProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-const PaginationControls = ({
-  page,
-  pageSize,
-  total,
-  onPageChange,
-  onPageSizeChange,
-}: PaginationControlsProps) => {
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((total || 0) / (pageSize || 1))),
-    [pageSize, total],
-  )
+const PaginationControls = ({ page, pageSize, total, onPageChange, onPageSizeChange }: PaginationControlsProps) => {
+  const totalPages = useMemo(() => Math.max(1, Math.ceil((total || 0) / (pageSize || 1))), [pageSize, total]);
 
-  const currentPage = Math.min(Math.max(page, 1), totalPages)
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
 
-  const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1
-  const end = Math.min(currentPage * pageSize, total)
+  const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, total);
 
   return (
     <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground/80">
@@ -74,8 +65,7 @@ const PaginationControls = ({
         Showing {start}-{end} of {total}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PaginationControls
-
+export default PaginationControls;

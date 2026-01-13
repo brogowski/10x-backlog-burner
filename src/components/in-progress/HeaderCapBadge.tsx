@@ -1,11 +1,13 @@
-type HeaderCapBadgeProps = {
-  currentCount: number
-  cap: number
-  isAtCap?: boolean
+interface HeaderCapBadgeProps {
+  currentCount: number;
+  cap: number;
+  isAtCap?: boolean;
 }
 
 const HeaderCapBadge = ({ currentCount, cap, isAtCap = currentCount >= cap }: HeaderCapBadgeProps) => {
-  const tone = isAtCap ? "bg-destructive/10 text-destructive border-destructive/40" : "bg-muted text-foreground/80 border-border"
+  const tone = isAtCap
+    ? "bg-destructive/10 text-destructive border-destructive/40"
+    : "bg-muted text-foreground/80 border-border";
 
   return (
     <span
@@ -17,8 +19,7 @@ const HeaderCapBadge = ({ currentCount, cap, isAtCap = currentCount >= cap }: He
         {currentCount} / {cap}
       </span>
     </span>
-  )
-}
+  );
+};
 
-export default HeaderCapBadge
-
+export default HeaderCapBadge;

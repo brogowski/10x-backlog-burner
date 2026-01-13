@@ -1,24 +1,24 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react";
 
-import BacklogEmptyState from "@/components/backlog/BacklogEmptyState"
-import BacklogList from "@/components/backlog/BacklogList"
-import PaginationControl from "@/components/backlog/PaginationControl"
-import AddGamesButton from "@/components/in-progress/AddGamesButton"
-import InlineErrorBanner from "@/components/in-progress/InlineErrorBanner"
-import SearchAddModal from "@/components/search-add/SearchAddModal"
-import { useBacklog } from "@/components/backlog/useBacklog"
-import { fetchInProgressCount } from "@/lib/backlog/backlogApi"
-import { IN_PROGRESS_CAP } from "@/lib/in-progress/types"
-import type { CapState } from "@/components/search-add/types"
+import BacklogEmptyState from "@/components/backlog/BacklogEmptyState";
+import BacklogList from "@/components/backlog/BacklogList";
+import PaginationControl from "@/components/backlog/PaginationControl";
+import AddGamesButton from "@/components/in-progress/AddGamesButton";
+import InlineErrorBanner from "@/components/in-progress/InlineErrorBanner";
+import SearchAddModal from "@/components/search-add/SearchAddModal";
+import { useBacklog } from "@/components/backlog/useBacklog";
+import { fetchInProgressCount } from "@/lib/backlog/backlogApi";
+import { IN_PROGRESS_CAP } from "@/lib/in-progress/types";
+import type { CapState } from "@/components/search-add/types";
 
 const BacklogPageView = () => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [capState, setCapState] = useState<CapState>({
     max: IN_PROGRESS_CAP,
     current: 0,
     canAdd: true,
     notice: undefined,
-  })
+  });
 
   const {
     backlog,
@@ -31,39 +31,40 @@ const BacklogPageView = () => {
     addToInProgress,
     removeFromBacklog,
     activeItemMutations,
-  } = useBacklog()
+  } = useBacklog();
 
   const handleAddGames = useCallback(() => {
-    setIsSearchOpen(true)
-  }, [])
+    setIsSearchOpen(true);
+  }, []);
 
   const handleCloseSearch = useCallback(() => {
-    setIsSearchOpen(false)
-    refetch()
-  }, [refetch])
+    setIsSearchOpen(false);
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
-    if (!isSearchOpen) return
-    const controller = new AbortController()
+    if (!isSearchOpen) return;
+    const controller = new AbortController();
 
     const loadCap = async () => {
       try {
-        const { count } = await fetchInProgressCount(controller.signal)
+        const { count } = await fetchInProgressCount(controller.signal);
         const next = {
           max: IN_PROGRESS_CAP,
           current: count,
           canAdd: count < IN_PROGRESS_CAP,
-          notice: count >= IN_PROGRESS_CAP ? "Your in-progress queue is full. Finish a game to add another." : undefined,
-        }
-        setCapState(next)
+          notice:
+            count >= IN_PROGRESS_CAP ? "Your in-progress queue is full. Finish a game to add another." : undefined,
+        };
+        setCapState(next);
       } catch {
         // Keep default cap state; errors are non-blocking.
       }
-    }
+    };
 
-    loadCap()
-    return () => controller.abort()
-  }, [isSearchOpen])
+    loadCap();
+    return () => controller.abort();
+  }, [isSearchOpen]);
 
   return (
     <section className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-10">
@@ -76,8 +77,7 @@ const BacklogPageView = () => {
           <AddGamesButton onClick={handleAddGames} disabled={false} />
         </div>
         <p className="max-w-2xl text-base text-foreground/80">
-          Review everything you own and move games into your in-progress queue when you’re ready to
-          play.
+          Review everything you own and move games into your in-progress queue when you’re ready to play.
         </p>
       </header>
 
@@ -119,14 +119,9 @@ const BacklogPageView = () => {
         </>
       )}
 
-      <SearchAddModal
-        isOpen={isSearchOpen}
-        onClose={handleCloseSearch}
-        capState={capState}
-      />
+      <SearchAddModal isOpen={isSearchOpen} onClose={handleCloseSearch} capState={capState} />
     </section>
-  )
-}
+  );
+};
 
-export default BacklogPageView
-
+export default BacklogPageView;

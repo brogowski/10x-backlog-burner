@@ -1,13 +1,13 @@
-import { fileURLToPath } from "node:url"
-import { defineConfig } from "vitest/config"
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
 
-const srcDir = fileURLToPath(new URL("./src", import.meta.url))
+const srcDir = fileURLToPath(new URL("./src", import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@/": `${srcDir}/`
-    }
+      "@/": `${srcDir}/`,
+    },
   },
   plugins: [],
   test: {
@@ -17,8 +17,7 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.{ts,tsx}", "tests/unit/**/*.spec.{ts,tsx}"],
     coverage: {
       reporter: ["text", "html"],
-      exclude: ["tests/**", "dist", "node_modules"]
-    }
-  }
-})
-
+      exclude: ["tests/**", "dist", "node_modules"],
+    },
+  },
+});

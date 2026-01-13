@@ -1,29 +1,23 @@
-import { useCallback } from "react"
+import { useCallback } from "react";
 
-type GenresMultiSelectProps = {
-  selected: string[]
-  options: string[]
-  onChange: (next: string[]) => void
+interface GenresMultiSelectProps {
+  selected: string[];
+  options: string[];
+  onChange: (next: string[]) => void;
 }
 
-const GenresMultiSelect = ({
-  selected,
-  options,
-  onChange,
-}: GenresMultiSelectProps) => {
+const GenresMultiSelect = ({ selected, options, onChange }: GenresMultiSelectProps) => {
   const handleToggle = useCallback(
     (genre: string, checked: boolean) => {
-      const next = checked
-        ? [...selected, genre]
-        : selected.filter((value) => value !== genre)
-      onChange(next)
+      const next = checked ? [...selected, genre] : selected.filter((value) => value !== genre);
+      onChange(next);
     },
-    [onChange, selected],
-  )
+    [onChange, selected]
+  );
 
   const handleClear = useCallback(() => {
-    onChange([])
-  }, [onChange])
+    onChange([]);
+  }, [onChange]);
 
   return (
     <div className="space-y-2">
@@ -40,7 +34,7 @@ const GenresMultiSelect = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {options.map((genre) => {
-          const isActive = selected.includes(genre)
+          const isActive = selected.includes(genre);
           return (
             <label
               key={genre}
@@ -52,20 +46,15 @@ const GenresMultiSelect = ({
                 checked={isActive}
                 onChange={(event) => handleToggle(genre, event.target.checked)}
               />
-              <span
-                className={`h-2 w-2 rounded-full ${isActive ? "bg-primary" : "bg-foreground/30"}`}
-              />
+              <span className={`h-2 w-2 rounded-full ${isActive ? "bg-primary" : "bg-foreground/30"}`} />
               <span className="text-foreground/90">{genre}</span>
             </label>
-          )
+          );
         })}
-        {options.length === 0 ? (
-          <p className="text-sm text-foreground/60">No genres available.</p>
-        ) : null}
+        {options.length === 0 ? <p className="text-sm text-foreground/60">No genres available.</p> : null}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GenresMultiSelect
-
+export default GenresMultiSelect;

@@ -1,31 +1,25 @@
-import type { GamePlayStatus } from "@/types"
+import type { GamePlayStatus } from "@/types";
 
-export type GameRowProps = {
-  steamAppId: number
-  title: string
-  lastUpdatedAt: string
-  importedAt: string
-  achievementsUnlocked?: number | null
-  achievementsTotal?: number | null
-  status: GamePlayStatus
-  slug: string
+export interface GameRowProps {
+  steamAppId: number;
+  title: string;
+  lastUpdatedAt: string;
+  importedAt: string;
+  achievementsUnlocked?: number | null;
+  achievementsTotal?: number | null;
+  status: GamePlayStatus;
+  slug: string;
 }
 
 const formatDate = (value: string) => {
-  const timestamp = Date.parse(value)
-  if (Number.isNaN(timestamp)) return null
-  return new Date(timestamp).toLocaleDateString()
-}
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return null;
+  return new Date(timestamp).toLocaleDateString();
+};
 
-const GameRow = ({
-  title,
-  lastUpdatedAt,
-  achievementsUnlocked,
-  achievementsTotal,
-  slug,
-}: GameRowProps) => {
-  const updatedLabel = formatDate(lastUpdatedAt)
-  const hasAchievements = achievementsUnlocked != null && achievementsUnlocked >= 0
+const GameRow = ({ title, lastUpdatedAt, achievementsUnlocked, achievementsTotal, slug }: GameRowProps) => {
+  const updatedLabel = formatDate(lastUpdatedAt);
+  const hasAchievements = achievementsUnlocked != null && achievementsUnlocked >= 0;
 
   return (
     <div className="flex flex-col gap-1">
@@ -44,8 +38,7 @@ const GameRow = ({
         ) : null}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GameRow
-
+export default GameRow;

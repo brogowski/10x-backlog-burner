@@ -1,20 +1,16 @@
-import EmailInput from "@/components/auth/EmailInput"
-import FormErrorAlert from "@/components/auth/FormErrorAlert"
-import PasswordInput from "@/components/auth/PasswordInput"
-import ResetPasswordLink from "@/components/auth/ResetPasswordLink"
-import SubmitButton from "@/components/auth/SubmitButton"
-import type {
-  AuthFormErrorsLogin,
-  AuthFormValuesLogin,
-  AuthFormStatus,
-} from "@/lib/auth/types"
+import EmailInput from "@/components/auth/EmailInput";
+import FormErrorAlert from "@/components/auth/FormErrorAlert";
+import PasswordInput from "@/components/auth/PasswordInput";
+import ResetPasswordLink from "@/components/auth/ResetPasswordLink";
+import SubmitButton from "@/components/auth/SubmitButton";
+import type { AuthFormErrorsLogin, AuthFormValuesLogin, AuthFormStatus } from "@/lib/auth/types";
 
-type LoginFormProps = {
-  values: AuthFormValuesLogin
-  errors: AuthFormErrorsLogin
-  status: AuthFormStatus
-  onChange: (field: "email" | "password", value: string) => void
-  onSubmit: (values: AuthFormValuesLogin) => Promise<void>
+interface LoginFormProps {
+  values: AuthFormValuesLogin;
+  errors: AuthFormErrorsLogin;
+  status: AuthFormStatus;
+  onChange: (field: "email" | "password", value: string) => void;
+  onSubmit: (values: AuthFormValuesLogin) => Promise<void>;
 }
 
 const LoginForm = ({ values, errors, status, onChange, onSubmit }: LoginFormProps) => {
@@ -22,8 +18,8 @@ const LoginForm = ({ values, errors, status, onChange, onSubmit }: LoginFormProp
     <form
       className="space-y-4"
       onSubmit={(ev) => {
-        ev.preventDefault()
-        void onSubmit(values)
+        ev.preventDefault();
+        void onSubmit(values);
       }}
       noValidate
     >
@@ -49,7 +45,7 @@ const LoginForm = ({ values, errors, status, onChange, onSubmit }: LoginFormProp
         <ResetPasswordLink />
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

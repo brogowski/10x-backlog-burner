@@ -1,32 +1,27 @@
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import type {
-  AuthFormValuesLogin,
-  AuthFormValuesSignup,
-  AuthFormStatus,
-  AuthMode,
-} from "@/lib/auth/types"
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { AuthFormValuesLogin, AuthFormValuesSignup, AuthFormStatus, AuthMode } from "@/lib/auth/types";
 
-import LoginForm from "./LoginForm"
-import SignupForm from "./SignupForm"
+import LoginForm from "./LoginForm";
+import SignupForm from "./SignupForm";
 
-type AuthTabsProps = {
-  mode: AuthMode
-  onChange: (mode: AuthMode) => void
+interface AuthTabsProps {
+  mode: AuthMode;
+  onChange: (mode: AuthMode) => void;
   loginFormProps: {
-    values: AuthFormValuesLogin
-    errors: Record<string, string | undefined>
-    status: AuthFormStatus
-    onChange: (field: "email" | "password", value: string) => void
-    onSubmit: (values: AuthFormValuesLogin) => Promise<void>
-  }
+    values: AuthFormValuesLogin;
+    errors: Record<string, string | undefined>;
+    status: AuthFormStatus;
+    onChange: (field: "email" | "password", value: string) => void;
+    onSubmit: (values: AuthFormValuesLogin) => Promise<void>;
+  };
   signupFormProps: {
-    values: AuthFormValuesSignup
-    errors: Record<string, string | undefined>
-    status: AuthFormStatus
-    onChange: (field: "email" | "password" | "confirmPassword", value: string) => void
-    onSubmit: (values: AuthFormValuesSignup) => Promise<void>
-  }
+    values: AuthFormValuesSignup;
+    errors: Record<string, string | undefined>;
+    status: AuthFormStatus;
+    onChange: (field: "email" | "password" | "confirmPassword", value: string) => void;
+    onSubmit: (values: AuthFormValuesSignup) => Promise<void>;
+  };
 }
 
 const AuthTabs = ({ mode, onChange, loginFormProps, signupFormProps }: AuthTabsProps) => {
@@ -37,10 +32,7 @@ const AuthTabs = ({ mode, onChange, loginFormProps, signupFormProps }: AuthTabsP
           type="button"
           role="tab"
           aria-selected={mode === "login"}
-          className={cn(
-            buttonVariants({ variant: mode === "login" ? "default" : "outline", size: "lg" }),
-            "w-full",
-          )}
+          className={cn(buttonVariants({ variant: mode === "login" ? "default" : "outline", size: "lg" }), "w-full")}
           onClick={() => onChange("login")}
         >
           Log in
@@ -49,10 +41,7 @@ const AuthTabs = ({ mode, onChange, loginFormProps, signupFormProps }: AuthTabsP
           type="button"
           role="tab"
           aria-selected={mode === "signup"}
-          className={cn(
-            buttonVariants({ variant: mode === "signup" ? "default" : "outline", size: "lg" }),
-            "w-full",
-          )}
+          className={cn(buttonVariants({ variant: mode === "signup" ? "default" : "outline", size: "lg" }), "w-full")}
           onClick={() => onChange("signup")}
         >
           Sign up
@@ -79,7 +68,7 @@ const AuthTabs = ({ mode, onChange, loginFormProps, signupFormProps }: AuthTabsP
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AuthTabs
+export default AuthTabs;

@@ -1,48 +1,34 @@
-import AddButton from "./AddButton"
-import type { AddStatus, CapState, GameCardVM } from "./types"
+import AddButton from "./AddButton";
+import type { AddStatus, CapState, GameCardVM } from "./types";
 
-type ResultItemProps = {
-  item: GameCardVM
-  addStatus: AddStatus
-  capState: CapState
-  onAddBacklog: (steamAppId: number) => void
-  onAddInProgress: (steamAppId: number) => void
+interface ResultItemProps {
+  item: GameCardVM;
+  addStatus: AddStatus;
+  capState: CapState;
+  onAddBacklog: (steamAppId: number) => void;
+  onAddInProgress: (steamAppId: number) => void;
 }
 
-const ResultItem = ({
-  item,
-  addStatus,
-  capState,
-  onAddBacklog,
-  onAddInProgress,
-}: ResultItemProps) => {
+const ResultItem = ({ item, addStatus, capState, onAddBacklog, onAddInProgress }: ResultItemProps) => {
   const backlogDisabledReason =
     item.addDisabledReason ??
     (item.isInProgress
       ? "This game is already in your in-progress queue."
       : item.isInBacklog
         ? "This game is already in your backlog."
-        : undefined)
+        : undefined);
 
   const inProgressDisabledReason =
-    item.addDisabledReason ??
-    (item.isInProgress ? "This game is already in your in-progress queue." : undefined)
+    item.addDisabledReason ?? (item.isInProgress ? "This game is already in your in-progress queue." : undefined);
 
   return (
     <article className="flex gap-4 rounded-lg border border-border bg-background p-4 shadow-sm">
       <div className="h-24 w-20 overflow-hidden rounded-md bg-muted">
         {item.artworkUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.artworkUrl}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+          <img src={item.artworkUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-foreground/50">
-            No art
-          </div>
+          <div className="flex h-full w-full items-center justify-center text-xs text-foreground/50">No art</div>
         )}
       </div>
 
@@ -77,20 +63,15 @@ const ResultItem = ({
             capState={capState}
           />
           {item.isInBacklog ? (
-            <span className="rounded-full bg-muted px-2 py-1 text-xs text-foreground/70">
-              Already in backlog
-            </span>
+            <span className="rounded-full bg-muted px-2 py-1 text-xs text-foreground/70">Already in backlog</span>
           ) : null}
           {item.isInProgress ? (
-            <span className="rounded-full bg-muted px-2 py-1 text-xs text-foreground/70">
-              In your queue
-            </span>
+            <span className="rounded-full bg-muted px-2 py-1 text-xs text-foreground/70">In your queue</span>
           ) : null}
         </div>
       </div>
     </article>
-  )
-}
+  );
+};
 
-export default ResultItem
-
+export default ResultItem;

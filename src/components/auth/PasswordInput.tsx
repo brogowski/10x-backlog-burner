@@ -1,19 +1,19 @@
-import { useState } from "react"
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-type PasswordInputProps = {
-  id: string
-  value: string
-  error?: string
-  label: string
-  onChange: (value: string) => void
+interface PasswordInputProps {
+  id: string;
+  value: string;
+  error?: string;
+  label: string;
+  onChange: (value: string) => void;
 }
 
 const PasswordInput = ({ id, value, error, label, onChange }: PasswordInputProps) => {
-  const [show, setShow] = useState(false)
-  const errorId = error ? `${id}-error` : undefined
+  const [show, setShow] = useState(false);
+  const errorId = error ? `${id}-error` : undefined;
 
   return (
     <div className="space-y-2">
@@ -31,7 +31,7 @@ const PasswordInput = ({ id, value, error, label, onChange }: PasswordInputProps
           aria-describedby={errorId}
           className={cn(
             "block w-full rounded-md border border-input bg-background px-3 py-2 pr-24 text-sm text-foreground shadow-xs transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            error ? "border-destructive/60 focus-visible:ring-destructive/50" : "",
+            error ? "border-destructive/60 focus-visible:ring-destructive/50" : ""
           )}
           autoComplete="current-password"
           required
@@ -54,7 +54,7 @@ const PasswordInput = ({ id, value, error, label, onChange }: PasswordInputProps
         </p>
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-export default PasswordInput
+export default PasswordInput;

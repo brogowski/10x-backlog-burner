@@ -1,28 +1,25 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
-type ReleaseRangeFilterProps = {
+interface ReleaseRangeFilterProps {
   value: {
-    releasedAfter?: string
-    releasedBefore?: string
-  }
-  onChange: (value: { releasedAfter?: string; releasedBefore?: string }) => void
+    releasedAfter?: string;
+    releasedBefore?: string;
+  };
+  onChange: (value: { releasedAfter?: string; releasedBefore?: string }) => void;
 }
 
 const ReleaseRangeFilter = ({ value, onChange }: ReleaseRangeFilterProps) => {
   const hasConflict = useMemo(() => {
     if (value.releasedAfter && value.releasedBefore) {
-      return Date.parse(value.releasedAfter) > Date.parse(value.releasedBefore)
+      return Date.parse(value.releasedAfter) > Date.parse(value.releasedBefore);
     }
-    return false
-  }, [value.releasedAfter, value.releasedBefore])
+    return false;
+  }, [value.releasedAfter, value.releasedBefore]);
 
-  const handleChange = (
-    key: "releasedAfter" | "releasedBefore",
-    nextValue: string,
-  ) => {
-    const sanitized = nextValue.trim().length ? nextValue : undefined
-    onChange({ ...value, [key]: sanitized })
-  }
+  const handleChange = (key: "releasedAfter" | "releasedBefore", nextValue: string) => {
+    const sanitized = nextValue.trim().length ? nextValue : undefined;
+    onChange({ ...value, [key]: sanitized });
+  };
 
   return (
     <div className="space-y-2">
@@ -33,9 +30,7 @@ const ReleaseRangeFilter = ({ value, onChange }: ReleaseRangeFilterProps) => {
           <input
             type="date"
             value={value.releasedAfter ?? ""}
-            onChange={(event) =>
-              handleChange("releasedAfter", event.target.value)
-            }
+            onChange={(event) => handleChange("releasedAfter", event.target.value)}
             className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </label>
@@ -44,21 +39,14 @@ const ReleaseRangeFilter = ({ value, onChange }: ReleaseRangeFilterProps) => {
           <input
             type="date"
             value={value.releasedBefore ?? ""}
-            onChange={(event) =>
-              handleChange("releasedBefore", event.target.value)
-            }
+            onChange={(event) => handleChange("releasedBefore", event.target.value)}
             className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </label>
       </div>
-      {hasConflict ? (
-        <p className="text-sm text-destructive">
-          Start date must be earlier than end date.
-        </p>
-      ) : null}
+      {hasConflict ? <p className="text-sm text-destructive">Start date must be earlier than end date.</p> : null}
     </div>
-  )
-}
+  );
+};
 
-export default ReleaseRangeFilter
-
+export default ReleaseRangeFilter;

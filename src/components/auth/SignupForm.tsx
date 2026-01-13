@@ -1,20 +1,16 @@
-import EmailInput from "@/components/auth/EmailInput"
-import FormErrorAlert from "@/components/auth/FormErrorAlert"
-import PasswordInput from "@/components/auth/PasswordInput"
-import PasswordRequirementsHint from "@/components/auth/PasswordRequirementsHint"
-import SubmitButton from "@/components/auth/SubmitButton"
-import type {
-  AuthFormErrorsSignup,
-  AuthFormStatus,
-  AuthFormValuesSignup,
-} from "@/lib/auth/types"
+import EmailInput from "@/components/auth/EmailInput";
+import FormErrorAlert from "@/components/auth/FormErrorAlert";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PasswordRequirementsHint from "@/components/auth/PasswordRequirementsHint";
+import SubmitButton from "@/components/auth/SubmitButton";
+import type { AuthFormErrorsSignup, AuthFormStatus, AuthFormValuesSignup } from "@/lib/auth/types";
 
-type SignupFormProps = {
-  values: AuthFormValuesSignup
-  errors: AuthFormErrorsSignup
-  status: AuthFormStatus
-  onChange: (field: "email" | "password" | "confirmPassword", value: string) => void
-  onSubmit: (values: AuthFormValuesSignup) => Promise<void>
+interface SignupFormProps {
+  values: AuthFormValuesSignup;
+  errors: AuthFormErrorsSignup;
+  status: AuthFormStatus;
+  onChange: (field: "email" | "password" | "confirmPassword", value: string) => void;
+  onSubmit: (values: AuthFormValuesSignup) => Promise<void>;
 }
 
 const SignupForm = ({ values, errors, status, onChange, onSubmit }: SignupFormProps) => {
@@ -22,8 +18,8 @@ const SignupForm = ({ values, errors, status, onChange, onSubmit }: SignupFormPr
     <form
       className="space-y-4"
       onSubmit={(ev) => {
-        ev.preventDefault()
-        void onSubmit(values)
+        ev.preventDefault();
+        void onSubmit(values);
       }}
       noValidate
     >
@@ -53,13 +49,9 @@ const SignupForm = ({ values, errors, status, onChange, onSubmit }: SignupFormPr
 
       <FormErrorAlert message={errors.general} />
 
-      <SubmitButton
-        label="Create account"
-        isLoading={status.isSubmitting}
-        disabled={status.isSubmitting}
-      />
+      <SubmitButton label="Create account" isLoading={status.isSubmitting} disabled={status.isSubmitting} />
     </form>
-  )
-}
+  );
+};
 
-export default SignupForm
+export default SignupForm;

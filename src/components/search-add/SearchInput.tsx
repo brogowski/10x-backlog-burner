@@ -1,39 +1,33 @@
-import { useCallback, useMemo } from "react"
-import type { KeyboardEvent, RefObject } from "react"
+import { useCallback, useMemo } from "react";
+import type { KeyboardEvent, RefObject } from "react";
 
-type SearchInputProps = {
-  value: string
-  onChange: (value: string) => void
-  onSubmit: () => void
-  isLoading?: boolean
-  inputRef?: RefObject<HTMLInputElement | null>
+interface SearchInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  isLoading?: boolean;
+  inputRef?: RefObject<HTMLInputElement | null>;
 }
 
-const MAX_LENGTH = 200
+const MAX_LENGTH = 200;
 
-const SearchInput = ({
-  value,
-  onChange,
-  onSubmit,
-  isLoading,
-  inputRef,
-}: SearchInputProps) => {
-  const trimmedValue = useMemo(() => value ?? "", [value])
+const SearchInput = ({ value, onChange, onSubmit, isLoading, inputRef }: SearchInputProps) => {
+  const trimmedValue = useMemo(() => value ?? "", [value]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Enter") {
-        event.preventDefault()
-        onSubmit()
+        event.preventDefault();
+        onSubmit();
       }
     },
-    [onSubmit],
-  )
+    [onSubmit]
+  );
 
   const handleClear = useCallback(() => {
-    onChange("")
-    inputRef?.current?.focus()
-  }, [inputRef, onChange])
+    onChange("");
+    inputRef?.current?.focus();
+  }, [inputRef, onChange]);
 
   return (
     <div className="flex items-center gap-3">
@@ -67,8 +61,7 @@ const SearchInput = ({
         />
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-export default SearchInput
-
+export default SearchInput;

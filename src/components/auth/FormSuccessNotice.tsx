@@ -1,9 +1,9 @@
-type FormSuccessNoticeProps = {
-  message?: string | null
+interface FormSuccessNoticeProps {
+  message?: string | null;
 }
 
 const FormSuccessNotice = ({ message }: FormSuccessNoticeProps) => {
-  if (!message) return null
+  if (!message) return null;
   return (
     <div
       role="status"
@@ -12,7 +12,7 @@ const FormSuccessNotice = ({ message }: FormSuccessNoticeProps) => {
     >
       {message}
     </div>
-  )
-}
+  );
+};
 
-export default FormSuccessNotice
+export default FormSuccessNotice;

@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-type RemoveFromBacklogButtonProps = {
-  onRemove: () => void
-  isLoading?: boolean
-  title?: string
+interface RemoveFromBacklogButtonProps {
+  onRemove: () => void;
+  isLoading?: boolean;
+  title?: string;
 }
 
 const RemoveFromBacklogButton = ({ onRemove, isLoading, title }: RemoveFromBacklogButtonProps) => (
@@ -15,7 +15,6 @@ const RemoveFromBacklogButton = ({ onRemove, isLoading, title }: RemoveFromBackl
   >
     {isLoading ? "Removing..." : "Remove"}
   </Button>
-)
+);
 
-export default RemoveFromBacklogButton
-
+export default RemoveFromBacklogButton;

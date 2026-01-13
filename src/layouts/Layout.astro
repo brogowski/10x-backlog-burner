@@ -5,10 +5,10 @@ interface Props {
   title?: string;
 }
 
-type MaybeUser = { id: string; email: string | null } | undefined
+type MaybeUser = { id: string; email: string | null } | undefined;
 
 const { title = "Backlog Burner" } = Astro.props;
-const user = Astro.locals.user as MaybeUser
+const user = Astro.locals.user as MaybeUser;
 ---
 
 <!doctype html>
@@ -22,51 +22,59 @@ const user = Astro.locals.user as MaybeUser
   </head>
   <body class="min-h-screen bg-background text-foreground">
     <div class="min-h-screen">
-      {user ? (
-        <header class="sticky top-0 z-10 border-b border-border/80 bg-background/80 backdrop-blur">
-          <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-6 py-3">
-            <div class="flex items-center gap-8">
-              <a
-                class="text-sm font-semibold tracking-tight text-foreground transition hover:text-foreground/80"
-                href="/in-progress"
-              >
-                Backlog Burner
-              </a>
-              <nav class="flex items-center gap-5 text-sm font-medium text-foreground/80" aria-label="Main navigation">
-                <a class="transition hover:text-foreground" href="/in-progress">
-                  In progress
+      {
+        user ? (
+          <header class="sticky top-0 z-10 border-b border-border/80 bg-background/80 backdrop-blur">
+            <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-6 py-3">
+              <div class="flex items-center gap-8">
+                <a
+                  class="text-sm font-semibold tracking-tight text-foreground transition hover:text-foreground/80"
+                  href="/in-progress"
+                >
+                  Backlog Burner
                 </a>
-                <a class="transition hover:text-foreground" href="/backlog">
-                  Backlog
-                </a>
-              </nav>
+                <nav
+                  class="flex items-center gap-5 text-sm font-medium text-foreground/80"
+                  aria-label="Main navigation"
+                >
+                  <a class="transition hover:text-foreground" href="/in-progress">
+                    In progress
+                  </a>
+                  <a class="transition hover:text-foreground" href="/backlog">
+                    Backlog
+                  </a>
+                </nav>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="truncate text-sm text-foreground/80" title={user.email ?? "Signed in"}>
+                  {user.email ?? "Signed in"}
+                </span>
+                <button
+                  type="button"
+                  data-logout-button
+                  class="rounded-md border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="truncate text-sm text-foreground/80" title={user.email ?? "Signed in"}>
-                {user.email ?? "Signed in"}
-              </span>
-              <button
-                type="button"
-                data-logout-button
-                class="rounded-md border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
-      ) : null}
+          </header>
+        ) : null
+      }
 
       <slot />
     </div>
 
-    {user ? (
-      <script>
-        const logoutButton = document.querySelector("[data-logout-button]")
-        if (logoutButton instanceof HTMLButtonElement) {
-          logoutButton.addEventListener("click", async () => {
-            logoutButton.disabled = true
-            logoutButton.setAttribute("aria-busy", "true")
+    {
+      user ? (
+        <script>
+          const logoutButton = document.querySelector("[data-logout-button]") 
+          if (logoutButton instanceof HTMLButtonElement) {
+            " "
+          }
+          {logoutButton.addEventListener("click", async () => {
+            logoutButton.disabled = true;
+            logoutButton.setAttribute("aria-busy", "true");
             try {
               await fetch("/api/v1/auth/logout", {
                 method: "POST",
@@ -74,16 +82,16 @@ const user = Astro.locals.user as MaybeUser
                 headers: {
                   "Content-Type": "application/json",
                 },
-              })
+              });
             } catch (error) {
-              console.error("Logout failed", error)
+              console.error("Logout failed", error);
             } finally {
-              window.location.assign("/auth")
+              window.location.assign("/auth");
             }
-          })
-        }
-      </script>
-    ) : null}
+          })}
+        </script>
+      ) : null
+    }
   </body>
 </html>
 

@@ -1,31 +1,31 @@
 ---
-import PasswordResetView from "../../components/auth/PasswordResetView"
-import AuthLayout from "../../layouts/AuthLayout.astro"
+import PasswordResetView from "../../components/auth/PasswordResetView";
+import AuthLayout from "../../layouts/AuthLayout.astro";
 
-export const prerender = false
+export const prerender = false;
 
-const DISALLOWED_REDIRECTS = ["/auth", "/auth/", "/auth/reset-confirm", "/reset-password"]
+const DISALLOWED_REDIRECTS = ["/auth", "/auth/", "/auth/reset-confirm", "/reset-password"];
 
 const sanitizeRedirect = (value: string | null): string | null => {
-  if (!value) return null
+  if (!value) return null;
   try {
-    const target = new URL(value, Astro.url)
-    const isSameOrigin = target.origin === Astro.url.origin
-    const isRelativePath = value.startsWith("/") || (!value.startsWith("http") && target.pathname.startsWith("/"))
-    const isDisallowed = DISALLOWED_REDIRECTS.some((path) => target.pathname === path)
+    const target = new URL(value, Astro.url);
+    const isSameOrigin = target.origin === Astro.url.origin;
+    const isRelativePath = value.startsWith("/") || (!value.startsWith("http") && target.pathname.startsWith("/"));
+    const isDisallowed = DISALLOWED_REDIRECTS.some((path) => target.pathname === path);
 
     if (!isSameOrigin || !isRelativePath || isDisallowed) {
-      return null
+      return null;
     }
 
-    return `${target.pathname}${target.search}${target.hash}`
+    return `${target.pathname}${target.search}${target.hash}`;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
-const redirectParam = Astro.url.searchParams.get("redirect")
-const safeRedirect = sanitizeRedirect(redirectParam)
+const redirectParam = Astro.url.searchParams.get("redirect");
+const safeRedirect = sanitizeRedirect(redirectParam);
 ---
 
 <AuthLayout title="Confirm password reset | Backlog Burner">
