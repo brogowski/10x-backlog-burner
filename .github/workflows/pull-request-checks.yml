@@ -1,0 +1,89 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  lint:
+    name: Lint sources
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run ESLint
+        uses: ./.github/actions/node-ci
+        with:
+          script: npm run lint
+
+  unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Vitest suite
+        uses: ./.github/actions/node-ci
+        with:
+          script: npm run test
+
+  e2e-tests:
+    name: Run e2e tests (integration)
+    runs-on: ubuntu-latest
+    environment: integration
+    env:
+      NODE_ENV: test 
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Playwright e2e suite
+        uses: ./.github/actions/node-ci
+        with:
+          script: npm run test:e2e
+
+  comment-results:
+    name: Comment PR Check results
+    needs:
+      - lint
+      - unit-tests
+      - e2e-tests
+    if: ${{ github.event.pull_request != null }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Post summary comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = [
+              { name: 'Lint', status: '${{ needs.lint.result }}' },
+              { name: 'Unit tests', status: '${{ needs.unit-tests.result }}' },
+              { name: 'e2e (integration)', status: '${{ needs.e2e-tests.result }}' },
+            ];
+            const allSuccess = results.every((r) => r.status === 'success');
+            const header = `${allSuccess ? '✅' : '❌'} Pull request checks finished:`;
+            const summary = results.map((r) => `- **${r.name}**: ${r.status}`).join('\n');
+            const body = [header, summary, ''].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: github.context.issue.number,
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              body,
+            });
