@@ -73,49 +73,23 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Build PR comment body
-        id: pr-comment
-        env:
-          LINT_RESULT: ${{ needs.lint.result }}
-          UNIT_RESULT: ${{ needs.unit-tests.result }}
-          E2E_RESULT: ${{ needs.e2e-tests.result }}
-        run: |
-          set -euo pipefail
-          declare -a results=(
-            "Lint:${LINT_RESULT}"
-            "Unit tests:${UNIT_RESULT}"
-            "e2e (integration):${E2E_RESULT}"
-          )
-          summary=''
-          all_success=true
-          for entry in "${results[@]}"; do
-            name="${entry%%:*}"
-            status="${entry#*:}"
-            summary="${summary}- **${name}**: ${status}"$'\n'
-            if [ "${status}" != "success" ]; then
-              all_success=false
-            fi
-          done
-          header="✅ Pull request checks finished"
-          if [ "${all_success}" != "true" ]; then
-            header="❌ Pull request checks finished"
-          fi
-          cat <<EOF >> "$GITHUB_OUTPUT"
-body<<END
-${header}
-
-${summary}
-END
-EOF
-      - name: Append PR results comment
+      - name: Post summary comment
         uses: actions/github-script@v7
-        env:
-          PR_COMMENT_BODY: ${{ steps.pr-comment.outputs.body }}
         with:
           script: |
+            const results = [
+              { name: 'Lint', status: '${{ needs.lint.result }}' },
+              { name: 'Unit tests', status: '${{ needs.unit-tests.result }}' },
+              { name: 'e2e (integration)', status: '${{ needs.e2e-tests.result }}' },
+            ];
+            const allSuccess = results.every((r) => r.status === 'success');
+            const header = `${allSuccess ? '✅' : '❌'} Pull request checks finished:`;
+            const summary = results.map((r) => `- **${r.name}**: ${r.status}`).join('\n');
+            const body = [header, summary, ''].join('\n');
             await github.rest.issues.createComment({
               issue_number: '${{ github.event.pull_request.number }}',
               owner: github.context.repo.owner,
               repo: github.context.repo.repo,
-              body: process.env.PR_COMMENT_BODY,
+              body,
             });
+
